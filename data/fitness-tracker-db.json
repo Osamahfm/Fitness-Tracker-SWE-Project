@@ -47,9 +47,42 @@
       "date": "4/28/2026",
       "time": "02:00 AM",
       "createdAt": "2026-04-27T23:00:48.144Z"
+    },
+    {
+      "id": "ca1c37ab8dd119cb4f4aaa04",
+      "userId": "c813efc97fae308461256a58",
+      "label": "Walking",
+      "distance": 2.5,
+      "duration": 30,
+      "effort": "Moderate",
+      "calories": 186,
+      "date": "4/28/2026",
+      "time": "02:13 AM",
+      "createdAt": "2026-04-27T23:13:24.193Z"
+    },
+    {
+      "id": "8b5371832d0bed9e12642ad5",
+      "userId": "c813efc97fae308461256a58",
+      "label": "Private Training",
+      "distance": 0,
+      "duration": 120,
+      "effort": "High",
+      "calories": 1516,
+      "date": "4/28/2026",
+      "time": "02:14 AM",
+      "createdAt": "2026-04-27T23:14:06.028Z"
     }
   ],
-  "alarms": [],
+  "alarms": [
+    {
+      "id": "a1add4324f7d9aa2bc572a25",
+      "userId": "c813efc97fae308461256a58",
+      "time": "18:00",
+      "note": "Daily workout reminder",
+      "triggered": false,
+      "createdAt": "2026-04-27T23:14:16.196Z"
+    }
+  ],
   "uatSignoffs": [
     {
       "id": "15783a6953e6f022c8c505d9",
@@ -76,6 +109,12 @@
       "type": "startup",
       "message": "Monitoring initialized",
       "createdAt": "2026-04-27T23:00:46.883Z"
+    },
+    {
+      "id": 1777331656196,
+      "type": "alarm",
+      "message": "Reminder set for 18:00",
+      "createdAt": "2026-04-27T23:14:16.196Z"
     }
   ]
 }
