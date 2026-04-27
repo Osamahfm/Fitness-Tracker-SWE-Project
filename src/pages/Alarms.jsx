@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useAppContext } from '../context/AppContext';
+import { useState } from 'react';
+import { useAppContext } from '../context/useAppContext';
 
 export default function Alarms() {
   const { state, setAlarm, showToast } = useAppContext();
@@ -14,10 +14,14 @@ export default function Alarms() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setAlarm({ ...formData, triggered: false });
-    showToast("Activity reminder set!");
+    try {
+      await setAlarm({ ...formData, triggered: false });
+      showToast("Activity reminder set!");
+    } catch (error) {
+      showToast(error.message, true);
+    }
   };
 
   return (

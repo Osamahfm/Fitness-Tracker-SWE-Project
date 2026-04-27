@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useAppContext } from '../context/AppContext';
+import { useState } from 'react';
+import { useAppContext } from '../context/useAppContext';
 
 export default function Profile() {
   const { state, updateProfile, showToast } = useAppContext();
@@ -16,10 +16,14 @@ export default function Profile() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    updateProfile({ ...formData, weight: Number(formData.weight), validated: true });
-    showToast("Profile settings saved successfully!");
+    try {
+      await updateProfile({ ...formData, weight: Number(formData.weight), validated: true });
+      showToast("Profile settings saved successfully!");
+    } catch (error) {
+      showToast(error.message, true);
+    }
   };
 
   return (

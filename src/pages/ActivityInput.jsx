@@ -1,50 +1,54 @@
-import React, { useState } from 'react';
-import { useAppContext } from '../context/AppContext';
-
-const factors = {
-  walk: { label: "Walking", met: 3.5 },
-  run: { label: "Running", met: 8.3 },
-  cycle: { label: "Cycling", met: 6.8 },
-  training: { label: "Private Training", met: 5.5 }
-};
-
-const effortLabels = {
-  "1.0": "Light",
-  "1.35": "Moderate",
-  "1.75": "High"
-};
+import { useEffect, useState } from 'react';
+import { useAppContext } from '../context/useAppContext';
+import { activityFactors, effortLabels } from '../utils/fitnessMath';
 
 export default function ActivityInput() {
-  const { state, addActivity, showToast } = useAppContext();
-  
+  const { state, estimateCalories, addActivity, showToast } = useAppContext();
+
   const [formData, setFormData] = useState({
     type: 'walk',
     distance: 2.5,
     duration: 30,
     effort: '1.35'
   });
+  const [calculation, setCalculation] = useState({
+    calories: 0,
+    validation: { checks: [], passed: false },
+    formula: "Calories = MET x 3.5 x body weight x duration x effort / 200"
+  });
+
+  useEffect(() => {
+    let active = true;
+    estimateCalories(formData)
+      .then((result) => {
+        if (active) setCalculation(result);
+      })
+      .catch((error) => {
+        if (active) showToast(error.message, true);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [estimateCalories, formData, showToast, state.profile.weight]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const estimateCalories = () => {
-    const weight = Number(state.profile.weight || 75);
-    const met = factors[formData.type].met;
-    return Math.max(0, Math.round((met * 3.5 * weight * Number(formData.duration) * Number(formData.effort)) / 200));
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    addActivity({
-      label: factors[formData.type].label,
-      distance: Number(formData.distance),
-      duration: Number(formData.duration),
-      effort: effortLabels[formData.effort],
-      calories: estimateCalories()
-    });
-    showToast("Physical activity recorded successfully!");
+    if (!calculation.validation.passed) {
+      return showToast("Please fix the calorie validation inputs first.", true);
+    }
+
+    try {
+      await addActivity(formData);
+      showToast("Physical activity recorded successfully!");
+    } catch (error) {
+      showToast(error.message, true);
+    }
   };
 
   return (
@@ -58,10 +62,9 @@ export default function ActivityInput() {
           <label>
             Activity type
             <select name="type" value={formData.type} onChange={handleChange}>
-              <option value="walk">Walking</option>
-              <option value="run">Running</option>
-              <option value="cycle">Cycling</option>
-              <option value="training">Private Training</option>
+              {Object.entries(activityFactors).map(([value, activity]) => (
+                <option key={value} value={value}>{activity.label}</option>
+              ))}
             </select>
           </label>
           <label>
@@ -75,9 +78,9 @@ export default function ActivityInput() {
           <label>
             Effort level
             <select name="effort" value={formData.effort} onChange={handleChange}>
-              <option value="1.0">Light</option>
-              <option value="1.35">Moderate</option>
-              <option value="1.75">High</option>
+              {Object.entries(effortLabels).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
             </select>
           </label>
           <button type="submit">Save Activity</button>
@@ -86,14 +89,27 @@ export default function ActivityInput() {
 
       <div className="panel">
         <div className="panel-heading">
-          <p className="eyebrow">Calories Calculation Engine</p>
+          <p className="eyebrow">Backend Calories Calculation Engine</p>
           <h3>Current Estimate</h3>
         </div>
         <div className="calorie-result">
-          <strong>{estimateCalories()}</strong>
+          <strong>{calculation.calories}</strong>
           <span>calories burned</span>
         </div>
-        <p style={{ color: 'var(--text-secondary)' }}>Formula uses the entered distance, duration, weight, and effort level to estimate burned calories.</p>
+        <div className="formula-box">
+          <strong>Formula</strong>
+          <p>{calculation.formula}</p>
+        </div>
+        <div className="readiness-list compact">
+          {calculation.validation.checks.map((check) => (
+            <div key={check.label} className={`readiness-item ${check.passed ? 'ready' : ''}`}>
+              <strong>{check.passed ? "Pass" : "Fix"}</strong>
+              <div>
+                <h4>{check.label}</h4>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

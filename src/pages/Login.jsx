@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppContext } from '../context/AppContext';
+import { useAppContext } from '../context/useAppContext';
 
 export default function Login() {
-  const { state, updateProfile, showToast } = useAppContext();
+  const { state, registerUser, loginUser, showToast } = useAppContext();
   const navigate = useNavigate();
   const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -14,23 +14,30 @@ export default function Login() {
     }
   }, [state.profile, navigate]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const email = formData.get('email');
-    const pass = formData.get('password');
+    const password = formData.get('password');
     const name = formData.get('name') || email.split('@')[0];
 
-    if (pass.length < 6) {
+    if (password.length < 6) {
       return showToast("Password must be at least 6 characters.", true);
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      updateProfile({ name, email });
+    try {
+      if (isRegister) {
+        await registerUser({ name, email, password });
+      } else {
+        await loginUser({ email, password });
+      }
       showToast(isRegister ? "Account created successfully!" : "Logged in successfully!");
-    }, 1200);
+    } catch (error) {
+      showToast(error.message, true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -39,9 +46,9 @@ export default function Login() {
         <div className="auth-header">
           <div className="brand-mark">FT</div>
           <h2>{isRegister ? "Create Account" : "Welcome Back"}</h2>
-          <p>{isRegister ? "Join us to track your fitness" : "Log in to access your fitness dashboard"}</p>
+          <p>{isRegister ? "Create validated access for the web fitness tracker" : "Log in to access your saved fitness records"}</p>
         </div>
-        
+
         <form className="auth-form" onSubmit={handleSubmit}>
           {isRegister && (
             <label>
@@ -55,13 +62,13 @@ export default function Login() {
           </label>
           <label>
             Password
-            <input type="password" name="password" placeholder="••••••••" required />
+            <input type="password" name="password" placeholder="Password" required />
           </label>
           <button type="submit" className={`primary-btn ${loading ? 'btn-loading' : ''}`}>
             {isRegister ? "Sign Up" : "Log In"}
           </button>
         </form>
-        
+
         <p className="auth-switch">
           {isRegister ? "Already have an account?" : "Don't have an account?"}{' '}
           <button type="button" className="text-btn" onClick={() => setIsRegister(!isRegister)}>

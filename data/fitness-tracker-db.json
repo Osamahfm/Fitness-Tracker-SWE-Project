@@ -1,0 +1,81 @@
+{
+  "users": [
+    {
+      "id": "e32702cf8cdd3c1af8946f86",
+      "name": "Smoke Tester",
+      "email": "smoke_9a5e8e74@example.com",
+      "goal": "Body Recompose",
+      "weight": 75,
+      "passwordSalt": "af1bad289c9d74704e91e08889b86e3c",
+      "passwordHash": "867c48075e60f4f1b2965a476a05b83b4d7ef2b5396e6cbf031b8c9e6bc3e586c6b73c85fd309bff2ac772b8fb15151d3ddd8e1e1e63f6c1187fcce92eaf904c",
+      "validated": true,
+      "createdAt": "2026-04-27T23:00:48.066Z"
+    },
+    {
+      "id": "c813efc97fae308461256a58",
+      "name": "Osama Hamada Fathy Mohamed",
+      "email": "os@gmail.com",
+      "goal": "Body Recompose",
+      "weight": 75,
+      "passwordSalt": "6fb031a1f50d5b7bf1f9d4ff2b18f303",
+      "passwordHash": "037ba9a357787eaba1c31916ea920cef5009f9deb6df503ad0681ab8ce46cff74740978bf07278f259652029065cc615b254f6d0ce1a6f97cbb8829feb60c9de",
+      "validated": true,
+      "createdAt": "2026-04-27T23:03:46.433Z"
+    }
+  ],
+  "sessions": [
+    {
+      "token": "255741fd2d685ad84574560e685a35e82ce904f12b0851a5",
+      "userId": "e32702cf8cdd3c1af8946f86",
+      "createdAt": "2026-04-27T23:00:48.066Z"
+    },
+    {
+      "token": "3e063026af15696441145a33155a27c3f7c52e3feb464416",
+      "userId": "c813efc97fae308461256a58",
+      "createdAt": "2026-04-27T23:03:46.433Z"
+    }
+  ],
+  "activities": [
+    {
+      "id": "39ee63ce0f0d90263cb8b37f",
+      "userId": "e32702cf8cdd3c1af8946f86",
+      "label": "Running",
+      "distance": 3.2,
+      "duration": 25,
+      "effort": "Moderate",
+      "calories": 368,
+      "date": "4/28/2026",
+      "time": "02:00 AM",
+      "createdAt": "2026-04-27T23:00:48.144Z"
+    }
+  ],
+  "alarms": [],
+  "uatSignoffs": [
+    {
+      "id": "15783a6953e6f022c8c505d9",
+      "userId": "e32702cf8cdd3c1af8946f86",
+      "approver": "Smoke Tester",
+      "role": "IT Department",
+      "result": "Approved",
+      "notes": "Smoke test signoff",
+      "createdAt": "2026-04-27T23:00:48.150Z"
+    },
+    {
+      "id": "5860f838b2f1c3ef736b7aaa",
+      "userId": "c813efc97fae308461256a58",
+      "approver": "Osama Hamada Fathy Mohamed",
+      "role": "IT Department",
+      "result": "Approved",
+      "notes": "UAT approval granted after validation.",
+      "createdAt": "2026-04-27T23:04:19.901Z"
+    }
+  ],
+  "monitoringEvents": [
+    {
+      "id": 1,
+      "type": "startup",
+      "message": "Monitoring initialized",
+      "createdAt": "2026-04-27T23:00:46.883Z"
+    }
+  ]
+}

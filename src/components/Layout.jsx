@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAppContext } from '../context/AppContext';
+import { useAppContext } from '../context/useAppContext';
 
 export default function Layout() {
   const { state, logout, showToast } = useAppContext();
@@ -20,9 +20,7 @@ export default function Layout() {
         const now = new Date();
         const current = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
         if (current === state.alarm.time) {
-          showToast(`⏰ ALARM: ${state.alarm.note}`, false);
-          // Normally we'd dispatch an action, for simplicity we trigger through context
-          // To keep it simple, we just show the toast and rely on the alarm remaining visible.
+          showToast(`ALARM: ${state.alarm.note}`, false);
         }
       }
     }, 30000);
@@ -49,9 +47,8 @@ export default function Layout() {
           <NavLink to="/reports" className={({ isActive }) => (isActive ? "active" : "")}>Daily Reports</NavLink>
           <NavLink to="/recommendations" className={({ isActive }) => (isActive ? "active" : "")}>Meals & Goals</NavLink>
           <NavLink to="/alarms" className={({ isActive }) => (isActive ? "active" : "")}>Activity Alarms</NavLink>
+          <NavLink to="/readiness" className={({ isActive }) => (isActive ? "active" : "")}>System Readiness</NavLink>
         </nav>
-
-
       </aside>
 
       <main className="main-content">

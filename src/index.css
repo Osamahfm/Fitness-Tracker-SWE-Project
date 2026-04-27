@@ -405,6 +405,10 @@ body {
   gap: 20px;
 }
 
+.form-grid.single {
+  grid-template-columns: 1fr;
+}
+
 .form-grid label {
   display: flex;
   flex-direction: column;
@@ -453,6 +457,23 @@ button[type="submit"] {
 button[type="submit"]:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px var(--accent-glow);
+}
+
+.secondary-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--panel-border);
+  color: var(--text-primary);
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-family: var(--font-family);
+  cursor: pointer;
+  margin-top: 18px;
+}
+
+.secondary-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .checklist {
@@ -552,6 +573,90 @@ tr:last-child td {
   background: rgba(16, 185, 129, 0.1);
   border: 1px solid rgba(16, 185, 129, 0.2);
   color: var(--success);
+}
+
+.formula-box {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.formula-box strong {
+  display: block;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.formula-box p {
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.readiness-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.readiness-list.compact {
+  gap: 10px;
+}
+
+.readiness-item {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 16px;
+  align-items: start;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.readiness-item.ready {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.readiness-item > strong {
+  color: var(--warning);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.readiness-item.ready > strong {
+  color: var(--success);
+}
+
+.readiness-item h4 {
+  margin-bottom: 4px;
+  font-size: 16px;
+}
+
+.readiness-item p {
+  color: var(--text-secondary);
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.signoff-history {
+  margin-top: 18px;
+}
+
+.empty-note,
+.loading-screen {
+  color: var(--text-secondary);
+}
+
+.loading-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  font-weight: 700;
 }
 
 /* Animations */

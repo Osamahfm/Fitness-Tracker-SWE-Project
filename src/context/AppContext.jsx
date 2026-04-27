@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-
-const AppContext = createContext();
+import { useCallback, useEffect, useState } from 'react';
+import { api, clearToken, getToken, setToken } from '../api/client';
+import { AppContext } from './appContextCore';
 
 const initialState = {
   profile: {
@@ -11,58 +11,142 @@ const initialState = {
     validated: false
   },
   activities: [],
-  alarm: null
+  alarm: null,
+  uatSignoffs: [],
+  health: null
 };
 
 export const AppProvider = ({ children }) => {
-  const [state, setState] = useState(() => {
-    const saved = localStorage.getItem("ft_state");
-    return saved ? JSON.parse(saved) : initialState;
-  });
-
+  const [state, setState] = useState(initialState);
   const [toasts, setToasts] = useState([]);
+  const [loadingSession, setLoadingSession] = useState(Boolean(getToken()));
+
+  const loadSession = useCallback(async () => {
+    if (!getToken()) {
+      setLoadingSession(false);
+      return;
+    }
+
+    try {
+      const data = await api('/me');
+      setState((current) => ({ ...current, ...data }));
+    } catch {
+      clearToken();
+      setState(initialState);
+    } finally {
+      setLoadingSession(false);
+    }
+  }, []);
+
+  const loadHealth = useCallback(async () => {
+    try {
+      const health = await api('/health');
+      setState((current) => ({ ...current, health }));
+    } catch {
+      setState((current) => ({ ...current, health: null }));
+    }
+  }, []);
 
   useEffect(() => {
-    localStorage.setItem("ft_state", JSON.stringify(state));
-  }, [state]);
+    queueMicrotask(() => {
+      loadSession();
+      loadHealth();
+    });
+  }, [loadHealth, loadSession]);
 
-  const updateProfile = (profileData) => {
-    setState(s => ({ ...s, profile: { ...s.profile, ...profileData } }));
+  const updateProfile = async (profileData) => {
+    const data = await api('/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profileData)
+    });
+    setState((s) => ({ ...s, profile: data.profile }));
   };
 
-  const addActivity = (activity) => {
-    setState(s => ({ ...s, activities: [{ ...activity, id: Date.now(), time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }, ...s.activities] }));
+  const registerUser = async ({ name, email, password }) => {
+    const data = await api('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, password })
+    });
+    setToken(data.token);
+    setState((s) => ({ ...s, profile: data.profile, activities: [], alarm: null, uatSignoffs: [] }));
+    await loadHealth();
   };
 
-  const deleteActivity = (id) => {
-    setState(s => ({ ...s, activities: s.activities.filter(a => a.id !== id) }));
+  const loginUser = async ({ email, password }) => {
+    const data = await api('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    });
+    setToken(data.token);
+    await loadSession();
+    await loadHealth();
   };
 
-  const setAlarm = (alarm) => {
-    setState(s => ({ ...s, alarm }));
+  const estimateCalories = useCallback(async (input) => {
+    return api('/calories', {
+      method: 'POST',
+      body: JSON.stringify(input)
+    });
+  }, []);
+
+  const addActivity = async (activity) => {
+    const data = await api('/activities', {
+      method: 'POST',
+      body: JSON.stringify(activity)
+    });
+    setState((s) => ({ ...s, activities: [data.activity, ...s.activities] }));
+    await loadHealth();
+    return data.activity;
+  };
+
+  const deleteActivity = async (id) => {
+    await api(`/activities/${id}`, { method: 'DELETE' });
+    setState((s) => ({ ...s, activities: s.activities.filter((a) => a.id !== id) }));
+    await loadHealth();
+  };
+
+  const setAlarm = async (alarm) => {
+    const data = await api('/alarms', {
+      method: 'POST',
+      body: JSON.stringify(alarm)
+    });
+    setState((s) => ({ ...s, alarm: data.alarm }));
+    await loadHealth();
+  };
+
+  const addUatSignoff = async (signoff) => {
+    const data = await api('/uat-signoff', {
+      method: 'POST',
+      body: JSON.stringify(signoff)
+    });
+    setState((s) => ({ ...s, uatSignoffs: [data.signoff, ...s.uatSignoffs] }));
+    return data.signoff;
   };
 
   const logout = () => {
-    localStorage.removeItem("ft_state");
+    clearToken();
     setState(initialState);
   };
 
-  const showToast = (message, isError = false) => {
+  const showToast = useCallback((message, isError = false) => {
     const id = Date.now();
-    setToasts(prev => [...prev, { id, message, isError }]);
+    setToasts((prev) => [...prev, { id, message, isError }]);
     setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
+      setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 3000);
-  };
+  }, []);
+
+  if (loadingSession) {
+    return <div className="loading-screen">Loading Fitness Tracker...</div>;
+  }
 
   return (
-    <AppContext.Provider value={{ state, updateProfile, addActivity, deleteActivity, setAlarm, logout, showToast, toasts }}>
+    <AppContext.Provider value={{ state, updateProfile, registerUser, loginUser, estimateCalories, addActivity, deleteActivity, setAlarm, addUatSignoff, loadHealth, logout, showToast, toasts }}>
       {children}
-      {/* Toast Container */}
       <div className="toast-container">
-        {toasts.map(toast => (
+        {toasts.map((toast) => (
           <div key={toast.id} className={`toast show ${toast.isError ? 'error' : ''}`}>
-            <span>{toast.isError ? '⚠️' : '✅'}</span>
+            <span>{toast.isError ? '!' : 'OK'}</span>
             <div>{toast.message}</div>
           </div>
         ))}
@@ -70,5 +154,3 @@ export const AppProvider = ({ children }) => {
     </AppContext.Provider>
   );
 };
-
-export const useAppContext = () => useContext(AppContext);

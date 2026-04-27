@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import Layout from './components/Layout';
@@ -9,6 +8,7 @@ import Reports from './pages/Reports';
 import MealsAndGoals from './pages/MealsAndGoals';
 import Alarms from './pages/Alarms';
 import Login from './pages/Login';
+import SystemReadiness from './pages/SystemReadiness';
 
 function App() {
   return (
@@ -23,6 +23,7 @@ function App() {
             <Route path="reports" element={<Reports />} />
             <Route path="recommendations" element={<MealsAndGoals />} />
             <Route path="alarms" element={<Alarms />} />
+            <Route path="readiness" element={<SystemReadiness />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
