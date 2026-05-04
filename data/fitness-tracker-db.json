@@ -21,6 +21,17 @@
       "passwordHash": "037ba9a357787eaba1c31916ea920cef5009f9deb6df503ad0681ab8ce46cff74740978bf07278f259652029065cc615b254f6d0ce1a6f97cbb8829feb60c9de",
       "validated": true,
       "createdAt": "2026-04-27T23:03:46.433Z"
+    },
+    {
+      "id": "f1e99e506f5b053a0f7f864c",
+      "name": "osama",
+      "email": "osama@gmail.com",
+      "goal": "Body Recompose",
+      "weight": 75,
+      "passwordSalt": "5029838041010d9f841d271d5ae69c9a",
+      "passwordHash": "d33b79f7e703f0ee1f83ba79620918cd2dd0b2ffdd485a1cca20c265ff4ea12558a8cc312e192d8b439288a1a6d7e171020724851d1005c812492a098eabe744",
+      "validated": true,
+      "createdAt": "2026-05-04T18:15:54.884Z"
     }
   ],
   "sessions": [
@@ -33,6 +44,11 @@
       "token": "3e063026af15696441145a33155a27c3f7c52e3feb464416",
       "userId": "c813efc97fae308461256a58",
       "createdAt": "2026-04-27T23:03:46.433Z"
+    },
+    {
+      "token": "0ac0274efa507ef0d36fd020882f8ce5f574c79f3d81e13f",
+      "userId": "f1e99e506f5b053a0f7f864c",
+      "createdAt": "2026-05-04T18:15:54.884Z"
     }
   ],
   "activities": [

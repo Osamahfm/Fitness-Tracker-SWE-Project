@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:4174/api";
+const API_BASE = "/api";
 const TOKEN_KEY = "ft_api_token";
 
 export function getToken() {
