@@ -1,7 +1,28 @@
 import { useEffect } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Activity,
+  AlarmClock,
+  BarChart3,
+  ClipboardCheck,
+  Dumbbell,
+  Home,
+  LogOut,
+  Salad,
+  UserRound
+} from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
+
+const navItems = [
+  { to: '/', label: 'Dashboard', icon: Home, end: true },
+  { to: '/activity', label: 'Workout', icon: Dumbbell },
+  { to: '/reports', label: 'Analytics', icon: BarChart3 },
+  { to: '/recommendations', label: 'Nutrition', icon: Salad },
+  { to: '/alarms', label: 'Alarms', icon: AlarmClock },
+  { to: '/profile', label: 'Profile', icon: UserRound },
+  { to: '/readiness', label: 'Readiness', icon: ClipboardCheck }
+];
 
 export default function Layout() {
   const { state, logout, showToast } = useAppContext();
@@ -33,36 +54,50 @@ export default function Layout() {
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-mark">FT</div>
+          <div className="brand-mark"><Activity size={24} /></div>
           <div>
-            <p className="eyebrow">Web Platform</p>
+            <p className="eyebrow">FitFlow</p>
             <h1>Fitness Tracker</h1>
           </div>
         </div>
 
         <nav className="nav-list">
-          <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : "")}>Dashboard</NavLink>
-          <NavLink to="/profile" className={({ isActive }) => (isActive ? "active" : "")}>Profile Settings</NavLink>
-          <NavLink to="/activity" className={({ isActive }) => (isActive ? "active" : "")}>Activity Input</NavLink>
-          <NavLink to="/reports" className={({ isActive }) => (isActive ? "active" : "")}>Daily Reports</NavLink>
-          <NavLink to="/recommendations" className={({ isActive }) => (isActive ? "active" : "")}>Meals & Goals</NavLink>
-          <NavLink to="/alarms" className={({ isActive }) => (isActive ? "active" : "")}>Activity Alarms</NavLink>
-          <NavLink to="/readiness" className={({ isActive }) => (isActive ? "active" : "")}>System Readiness</NavLink>
+          {navItems.map(({ to, label, icon: Icon, end }) => (
+            <NavLink key={to} to={to} end={end} className={({ isActive }) => (isActive ? 'active' : '')}>
+              <Icon size={20} />
+              <span>{label}</span>
+            </NavLink>
+          ))}
         </nav>
+
+        <div className="status-panel">
+          <p className="eyebrow">Today</p>
+          <div className="target">
+            <span>Tracking</span>
+            <strong>{state.activities.length ? 'Live' : 'Ready'}</strong>
+          </div>
+          <div className="target">
+            <span>Goal</span>
+            <strong>{state.profile.goal.replace('User ', '')}</strong>
+          </div>
+        </div>
       </aside>
 
       <main className="main-content">
         <header className="topbar">
           <div>
-            <p className="eyebrow">Fitness Tracker System</p>
+            <p className="eyebrow">Fitness Tracker</p>
             <h2>Daily Activity Workspace</h2>
           </div>
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <div className="topbar-actions">
             <div className="profile-pill">
               <span className={`dot ${state.profile.validated ? 'valid' : ''}`}></span>
               <span>{state.profile.name}</span>
             </div>
-            <button onClick={logout} className="text-btn" style={{ color: 'var(--text-secondary)' }}>Log Out</button>
+            <button onClick={logout} className="icon-text-btn" type="button">
+              <LogOut size={16} />
+              <span>Log Out</span>
+            </button>
           </div>
         </header>
 
