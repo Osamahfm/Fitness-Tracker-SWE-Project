@@ -32,6 +32,17 @@
       "passwordHash": "d33b79f7e703f0ee1f83ba79620918cd2dd0b2ffdd485a1cca20c265ff4ea12558a8cc312e192d8b439288a1a6d7e171020724851d1005c812492a098eabe744",
       "validated": true,
       "createdAt": "2026-05-04T18:15:54.884Z"
+    },
+    {
+      "id": "3dd705b720d0f0e9e565f6fb",
+      "name": "ahmed mohamed",
+      "email": "ahmed@gmail.com",
+      "goal": "Maintain Body Weight",
+      "weight": 115,
+      "passwordSalt": "6ffb38ad9fbbe4771858673fe26919b7",
+      "passwordHash": "5cd5327dee1c177271e86a25f08e462b9dc46299f0507be995ed7f041ed31547371e624ccd0f86a01efe069fa555b7d1ac1f04bc00e23be0a7d67d1d1fce95ef",
+      "validated": true,
+      "createdAt": "2026-05-08T16:43:13.333Z"
     }
   ],
   "sessions": [
@@ -54,6 +65,11 @@
       "token": "8809557e5f07b88f98ed0f0e97f0c8ad75f6d817f99ec609",
       "userId": "f1e99e506f5b053a0f7f864c",
       "createdAt": "2026-05-04T18:18:42.998Z"
+    },
+    {
+      "token": "c3742239bab2096032874f8f840997d686106ed3c2fbd029",
+      "userId": "3dd705b720d0f0e9e565f6fb",
+      "createdAt": "2026-05-08T16:43:13.333Z"
     }
   ],
   "activities": [
@@ -104,6 +120,42 @@
       "date": "5/8/2026",
       "time": "06:36 PM",
       "createdAt": "2026-05-08T15:36:56.574Z"
+    },
+    {
+      "id": "587f6cab687032ac655ecb90",
+      "userId": "3dd705b720d0f0e9e565f6fb",
+      "label": "Walking",
+      "distance": 5,
+      "duration": 60,
+      "effort": "Light",
+      "calories": 423,
+      "date": "5/8/2026",
+      "time": "07:43 PM",
+      "createdAt": "2026-05-08T16:43:44.318Z"
+    },
+    {
+      "id": "e85c61813ccead244a3363fa",
+      "userId": "3dd705b720d0f0e9e565f6fb",
+      "label": "Walking",
+      "distance": 2.5,
+      "duration": 30,
+      "effort": "Moderate",
+      "calories": 285,
+      "date": "5/8/2026",
+      "time": "07:43 PM",
+      "createdAt": "2026-05-08T16:43:50.378Z"
+    },
+    {
+      "id": "9af94fccf5afdee7f09a8391",
+      "userId": "3dd705b720d0f0e9e565f6fb",
+      "label": "Cycling",
+      "distance": 2.5,
+      "duration": 120,
+      "effort": "High",
+      "calories": 2874,
+      "date": "5/8/2026",
+      "time": "07:44 PM",
+      "createdAt": "2026-05-08T16:44:01.236Z"
     }
   ],
   "alarms": [
