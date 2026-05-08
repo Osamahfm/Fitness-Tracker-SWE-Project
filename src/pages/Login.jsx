@@ -64,10 +64,10 @@ export default function Login() {
 
         <form className="auth-form" onSubmit={handleSubmit}>
           {isRegister && (
-            <label>
-              <span><UserRound size={18} /> Full Name</span>
-              <input type="text" name="name" placeholder="Enter your name" required />
-            </label>
+              <label>
+                <span><UserRound size={18} /> Full Name</span>
+                <input type="text" name="name" placeholder="Enter your name" autoComplete="name" required />
+              </label>
           )}
           {isRegister && (
             <>
@@ -87,11 +87,11 @@ export default function Login() {
           )}
           <label>
             <span><Mail size={18} /> Email</span>
-            <input type="email" name="email" placeholder="user@example.com" required />
+            <input type="email" name="email" placeholder="user@example.com" autoComplete="email" required />
           </label>
           <label>
             <span><LockKeyhole size={18} /> Password</span>
-            <input type="password" name="password" placeholder="Password" required />
+            <input type="password" name="password" placeholder="Password" autoComplete={isRegister ? 'new-password' : 'current-password'} required />
           </label>
           <button type="submit" className={`primary-btn ${loading ? 'btn-loading' : ''}`}>
             <span>{isRegister ? "Sign Up" : "Log In"}</span>

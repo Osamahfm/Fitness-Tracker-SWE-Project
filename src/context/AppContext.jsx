@@ -16,6 +16,19 @@ const initialState = {
   health: null
 };
 
+async function fetchHealthSnapshot() {
+  try {
+    return await api('/health');
+  } catch {
+    return null;
+  }
+}
+
+function clearFormDrafts() {
+  sessionStorage.removeItem('activityInputDraft');
+  sessionStorage.removeItem('alarmInputDraft');
+}
+
 export const AppProvider = ({ children }) => {
   const [state, setState] = useState(initialState);
   const [toasts, setToasts] = useState([]);
@@ -39,12 +52,8 @@ export const AppProvider = ({ children }) => {
   }, []);
 
   const loadHealth = useCallback(async () => {
-    try {
-      const health = await api('/health');
-      setState((current) => ({ ...current, health }));
-    } catch {
-      setState((current) => ({ ...current, health: null }));
-    }
+    const health = await fetchHealthSnapshot();
+    setState((current) => ({ ...current, health }));
   }, []);
 
   useEffect(() => {
@@ -68,8 +77,9 @@ export const AppProvider = ({ children }) => {
       body: JSON.stringify({ name, email, password, goal, weight })
     });
     setToken(data.token);
-    setState((s) => ({ ...s, profile: data.profile, activities: [], alarm: null, uatSignoffs: [] }));
-    await loadHealth();
+    clearFormDrafts();
+    const health = await fetchHealthSnapshot();
+    setState((s) => ({ ...s, profile: data.profile, activities: [], alarm: null, uatSignoffs: [], health }));
   };
 
   const loginUser = async ({ email, password }) => {
@@ -78,8 +88,9 @@ export const AppProvider = ({ children }) => {
       body: JSON.stringify({ email, password })
     });
     setToken(data.token);
-    await loadSession();
-    await loadHealth();
+    clearFormDrafts();
+    const [session, health] = await Promise.all([api('/me'), fetchHealthSnapshot()]);
+    setState((s) => ({ ...s, ...session, health }));
   };
 
   const estimateCalories = useCallback(async (input) => {
@@ -125,6 +136,7 @@ export const AppProvider = ({ children }) => {
 
   const logout = () => {
     clearToken();
+    clearFormDrafts();
     setState(initialState);
   };
 

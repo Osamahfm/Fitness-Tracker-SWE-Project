@@ -3,15 +3,26 @@ import { AlertCircle, Calculator, CheckCircle2, Dumbbell, Gauge, Route, Timer } 
 import { useAppContext } from '../context/useAppContext';
 import { activityFactors, effortLabels } from '../utils/fitnessMath';
 
+const defaultActivityForm = {
+  type: 'walk',
+  distance: 2.5,
+  duration: 30,
+  effort: '1.35'
+};
+
+function getSavedActivityDraft() {
+  try {
+    const saved = sessionStorage.getItem('activityInputDraft');
+    return saved ? { ...defaultActivityForm, ...JSON.parse(saved) } : defaultActivityForm;
+  } catch {
+    return defaultActivityForm;
+  }
+}
+
 export default function ActivityInput() {
   const { state, estimateCalories, addActivity, showToast } = useAppContext();
 
-  const [formData, setFormData] = useState({
-    type: 'walk',
-    distance: 2.5,
-    duration: 30,
-    effort: '1.35'
-  });
+  const [formData, setFormData] = useState(getSavedActivityDraft);
   const [calculation, setCalculation] = useState({
     calories: 0,
     validation: { checks: [], passed: false },
@@ -33,6 +44,10 @@ export default function ActivityInput() {
     };
   }, [estimateCalories, formData, showToast, state.profile.weight]);
 
+  useEffect(() => {
+    sessionStorage.setItem('activityInputDraft', JSON.stringify(formData));
+  }, [formData]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -46,6 +61,8 @@ export default function ActivityInput() {
 
     try {
       await addActivity(formData);
+      sessionStorage.removeItem('activityInputDraft');
+      setFormData(defaultActivityForm);
       showToast("Physical activity recorded successfully!");
     } catch (error) {
       showToast(error.message, true);

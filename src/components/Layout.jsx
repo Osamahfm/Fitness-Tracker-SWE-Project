@@ -63,7 +63,7 @@ export default function Layout() {
 
         <nav className="nav-list">
           {navItems.map(({ to, label, icon: Icon, end }) => (
-            <NavLink key={to} to={to} end={end} className={({ isActive }) => (isActive ? 'active' : '')}>
+            <NavLink key={to} to={to} end={end} aria-label={label} className={({ isActive }) => (isActive ? 'active' : '')}>
               <Icon size={20} />
               <span>{label}</span>
             </NavLink>

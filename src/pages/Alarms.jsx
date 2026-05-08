@@ -1,14 +1,31 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AlarmClock, BellRing, Clock, MessageSquareText } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
+
+function defaultAlarmForm(alarm) {
+  return {
+    time: alarm ? alarm.time : '18:00',
+    note: alarm ? alarm.note : 'Daily workout reminder'
+  };
+}
+
+function getSavedAlarmDraft(alarm) {
+  try {
+    const saved = sessionStorage.getItem('alarmInputDraft');
+    return saved ? { ...defaultAlarmForm(alarm), ...JSON.parse(saved) } : defaultAlarmForm(alarm);
+  } catch {
+    return defaultAlarmForm(alarm);
+  }
+}
 
 export default function Alarms() {
   const { state, setAlarm, showToast } = useAppContext();
   
-  const [formData, setFormData] = useState({
-    time: state.alarm ? state.alarm.time : '18:00',
-    note: state.alarm ? state.alarm.note : 'Daily workout reminder'
-  });
+  const [formData, setFormData] = useState(() => getSavedAlarmDraft(state.alarm));
+
+  useEffect(() => {
+    sessionStorage.setItem('alarmInputDraft', JSON.stringify(formData));
+  }, [formData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,6 +36,7 @@ export default function Alarms() {
     e.preventDefault();
     try {
       await setAlarm({ ...formData, triggered: false });
+      sessionStorage.removeItem('alarmInputDraft');
       showToast("Activity reminder set!");
     } catch (error) {
       showToast(error.message, true);
