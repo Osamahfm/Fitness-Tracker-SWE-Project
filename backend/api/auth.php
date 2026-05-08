@@ -4,25 +4,50 @@
  * RESTful API for user registration, login, and session management
  */
 
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
+// Load configuration
+require_once __DIR__ . '/../config/Config.php';
+require_once __DIR__ . '/../helpers/ValidationHelper.php';
+require_once __DIR__ . '/../helpers/RateLimiter.php';
+require_once __DIR__ . '/../helpers/ResponseHelper.php';
+require_once __DIR__ . '/../services/AuthService.php';
+
+// Set security headers
+header('Content-Type: application/json; charset=utf-8');
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('X-XSS-Protection: 1; mode=block');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+
+// Handle CORS with configured origins
+$allowedOrigins = explode(',', Config::get('CORS_ALLOWED_ORIGINS', 'http://localhost:8000'));
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+if (in_array($origin, $allowedOrigins)) {
+    header("Access-Control-Allow-Origin: $origin");
+    header('Access-Control-Allow-Credentials: true');
+}
+
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Max-Age: 86400');
 
 // Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
     exit(0);
 }
 
-require_once __DIR__ . '/../services/AuthService.php';
-
 $authService = new AuthService();
+$rateLimiter = new RateLimiter();
 $method = $_SERVER['REQUEST_METHOD'];
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $pathParts = explode('/', trim($path, '/'));
 
 // Get the endpoint (last part of path)
 $endpoint = end($pathParts);
+
+// Get client identifier
+$clientId = $_SERVER['REMOTE_ADDR'] . '_' . $endpoint;
 
 try {
     switch ($method) {
@@ -70,14 +95,32 @@ function handleRegister() {
     
     if (!$input) {
         sendErrorResponse('Invalid JSON input', 400);
+        return;
     }
     
-    $result = $authService->register($input);
+    // Validate input
+    $validationErrors = ValidationHelper::validateRegistrationData($input);
+    if (!empty($validationErrors)) {
+        sendErrorResponse('Validation failed', 422, $validationErrors);
+        return;
+    }
     
-    if ($result['success']) {
-        sendJsonResponse($result, 201);
-    } else {
-        sendErrorResponse($result['message'], 400);
+    // Sanitize inputs
+    $input['email'] = ValidationHelper::sanitizeEmail($input['email']);
+    $input['username'] = ValidationHelper::sanitizeString($input['username']);
+    $input['first_name'] = ValidationHelper::sanitizeString($input['first_name']);
+    $input['last_name'] = ValidationHelper::sanitizeString($input['last_name']);
+    
+    try {
+        $result = $authService->register($input);
+        
+        if ($result['success']) {
+            sendJsonResponse($result, 201);
+        } else {
+            sendErrorResponse($result['message'], 400);
+        }
+    } catch (Exception $e) {
+        sendErrorResponse($e->getMessage(), 400);
     }
 }
 
@@ -89,29 +132,45 @@ function handleLogin() {
     
     $input = json_decode(file_get_contents('php://input'), true);
     
-    if (!$input || !isset($input['email']) || !isset($input['password'])) {
-        sendErrorResponse('Email and password are required', 400);
+    if (!$input) {
+        sendErrorResponse('Invalid JSON input', 400);
+        return;
     }
     
-    $ipAddress = $_SERVER['REMOTE_ADDR'];
+    // Validate input
+    $validationErrors = ValidationHelper::validateLoginData($input);
+    if (!empty($validationErrors)) {
+        sendErrorResponse('Validation failed', 422, $validationErrors);
+        return;
+    }
+    
+    // Sanitize inputs
+    $email = ValidationHelper::sanitizeEmail($input['email']);
+    $password = $input['password'];
+    
+    $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
     $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
     
-    $result = $authService->login($input['email'], $input['password'], $ipAddress, $userAgent);
-    
-    if ($result['success']) {
-        // Set session cookie
-        setcookie('session_id', $result['session_id'], [
-            'expires' => time() + 86400, // 24 hours
-            'path' => '/',
-            'domain' => '',
-            'secure' => false, // Set to true in production with HTTPS
-            'httponly' => true,
-            'samesite' => 'Strict'
-        ]);
+    try {
+        $result = $authService->login($email, $password, $ipAddress, $userAgent);
         
-        sendJsonResponse($result, 200);
-    } else {
-        sendErrorResponse('Login failed', 401);
+        if ($result['success']) {
+            // Set session cookie with secure settings
+            setcookie('session_id', $result['session_id'], [
+                'expires' => time() + Config::getInt('SESSION_TIMEOUT', 3600),
+                'path' => '/',
+                'domain' => '',
+                'secure' => Config::getBoolean('SESSION_SECURE', false),
+                'httponly' => Config::getBoolean('SESSION_HTTPONLY', true),
+                'samesite' => 'Strict'
+            ]);
+            
+            sendJsonResponse($result, 200);
+        } else {
+            sendErrorResponse('Login failed', 401);
+        }
+    } catch (Exception $e) {
+        sendErrorResponse($e->getMessage(), 400);
     }
 }
 
@@ -202,9 +261,18 @@ function sendJsonResponse($data, $statusCode = 200) {
 /**
  * Send error response
  */
-function sendErrorResponse($message, $statusCode = 400) {
+function sendErrorResponse($message, $statusCode = 400, $errors = null) {
     http_response_code($statusCode);
-    echo json_encode(['success' => false, 'error' => $message]);
+    $response = [
+        'success' => false,
+        'message' => $message
+    ];
+    
+    if ($errors !== null && is_array($errors)) {
+        $response['errors'] = $errors;
+    }
+    
+    echo json_encode($response);
     exit;
 }
 ?>

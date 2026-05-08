@@ -4,16 +4,25 @@
  * Implements Singleton pattern for database connections
  */
 
+require_once __DIR__ . '/Config.php';
+
 class Database {
     private static $instance = null;
     private $connection;
-    private $host = 'localhost';
-    private $username = 'root';
-    private $password = '';
-    private $database = 'fitness_tracker';
+    private $host;
+    private $username;
+    private $password;
+    private $database;
     private $charset = 'utf8mb4';
 
     private function __construct() {
+        // Load environment configuration
+        $this->host = Config::get('DB_HOST', 'localhost');
+        $this->username = Config::get('DB_USERNAME', 'root');
+        $this->password = Config::get('DB_PASSWORD', '');
+        $this->database = Config::get('DB_NAME', 'fitness_tracker');
+        $this->charset = Config::get('DB_CHARSET', 'utf8mb4');
+
         $dsn = "mysql:host={$this->host};dbname={$this->database};charset={$this->charset}";
         $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
