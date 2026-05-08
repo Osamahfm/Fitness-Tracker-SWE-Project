@@ -2,12 +2,43 @@ import { useEffect, useState } from 'react';
 import { AlertCircle, Calculator, CheckCircle2, Dumbbell, Gauge, Route, Timer } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
 import { activityFactors, effortLabels } from '../utils/fitnessMath';
+import { getRoleProfile } from '../utils/userRoles';
 
 const defaultActivityForm = {
   type: 'walk',
   distance: 2.5,
   duration: 30,
   effort: '1.35'
+};
+
+const activityPageByRole = {
+  customer: {
+    eyebrow: 'Physical Activity Tracking Module',
+    title: "Plan today's session",
+    copy: 'Log the workout details your report and nutrition guidance will use.',
+    engineEyebrow: 'Backend Calories Calculation Engine',
+    engineTitle: 'Current estimate',
+    engineCopy: 'Validated server-side before the activity is saved.',
+    submitLabel: 'Save Activity'
+  },
+  trainer: {
+    eyebrow: 'Trainer Session Builder',
+    title: 'Build a coached session',
+    copy: 'Record session details so client analytics and recommendations stay aligned.',
+    engineEyebrow: 'Coaching Calorie Estimate',
+    engineTitle: 'Session estimate',
+    engineCopy: 'Use the backend result to guide safe workload decisions.',
+    submitLabel: 'Save Session'
+  },
+  admin: {
+    eyebrow: 'Activity QA Console',
+    title: 'Test activity calculation',
+    copy: 'Validate calorie inputs, calculation results, and saved activity records.',
+    engineEyebrow: 'Backend Calories Engine',
+    engineTitle: 'QA estimate',
+    engineCopy: 'Server-side validation runs before the test record is saved.',
+    submitLabel: 'Save QA Record'
+  }
 };
 
 function getSavedActivityDraft() {
@@ -21,6 +52,8 @@ function getSavedActivityDraft() {
 
 export default function ActivityInput() {
   const { state, estimateCalories, addActivity, showToast } = useAppContext();
+  const role = getRoleProfile(state.profile.role).value;
+  const pageCopy = activityPageByRole[role] || activityPageByRole.customer;
 
   const [formData, setFormData] = useState(getSavedActivityDraft);
   const [calculation, setCalculation] = useState({
@@ -73,9 +106,9 @@ export default function ActivityInput() {
     <section className="workspace two-column">
       <div className="panel feature-panel">
         <div className="panel-heading">
-          <p className="eyebrow">Physical Activity Tracking Module</p>
-          <h3>Plan today's session</h3>
-          <p className="panel-copy">Log the workout details your report and nutrition guidance will use.</p>
+          <p className="eyebrow">{pageCopy.eyebrow}</p>
+          <h3>{pageCopy.title}</h3>
+          <p className="panel-copy">{pageCopy.copy}</p>
         </div>
         <form className="form-grid activity-form" onSubmit={handleSubmit}>
           <label className="field-card">
@@ -102,15 +135,15 @@ export default function ActivityInput() {
               ))}
             </select>
           </label>
-          <button type="submit">Save Activity</button>
+          <button type="submit">{pageCopy.submitLabel}</button>
         </form>
       </div>
 
       <div className="panel">
         <div className="panel-heading">
-          <p className="eyebrow">Backend Calories Calculation Engine</p>
-          <h3>Current estimate</h3>
-          <p className="panel-copy">Validated server-side before the activity is saved.</p>
+          <p className="eyebrow">{pageCopy.engineEyebrow}</p>
+          <h3>{pageCopy.engineTitle}</h3>
+          <p className="panel-copy">{pageCopy.engineCopy}</p>
         </div>
         <div className="calorie-result elevated-result">
           <Calculator size={26} />

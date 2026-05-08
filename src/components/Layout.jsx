@@ -13,7 +13,7 @@ import {
   UserRound
 } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
-import { getRoleProfile } from '../utils/userRoles';
+import { getRoleInterface, getRoleProfile } from '../utils/userRoles';
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: Home, end: true },
@@ -30,6 +30,10 @@ export default function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
   const roleProfile = getRoleProfile(state.profile.role);
+  const roleInterface = getRoleInterface(state.profile.role);
+  const visibleNavItems = navItems
+    .filter((item) => roleInterface.navRoutes.includes(item.to))
+    .map((item) => ({ ...item, label: roleInterface.navLabels[item.to] || item.label }));
 
   useEffect(() => {
     if (!state.profile.email || !state.profile.name) {
@@ -64,7 +68,7 @@ export default function Layout() {
         </div>
 
         <nav className="nav-list">
-          {navItems.map(({ to, label, icon: Icon, end }) => (
+          {visibleNavItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink key={to} to={to} end={end} aria-label={label} className={({ isActive }) => (isActive ? 'active' : '')}>
               <Icon size={20} />
               <span>{label}</span>
@@ -92,15 +96,15 @@ export default function Layout() {
       <main className="main-content">
         <header className="topbar">
           <div>
-            <p className="eyebrow">Fitness Tracker</p>
-            <h2>Daily Activity Workspace</h2>
+            <p className="eyebrow">{roleInterface.topbarEyebrow}</p>
+            <h2>{roleInterface.workspaceTitle}</h2>
           </div>
           <div className="topbar-actions">
             <div className="profile-pill">
               <span className={`dot ${state.profile.validated ? 'valid' : ''}`}></span>
               <span>{state.profile.name}</span>
             </div>
-            <div className="role-badge">{roleProfile.label}</div>
+            <div className={`role-badge role-${roleProfile.value}`}>{roleProfile.label}</div>
             <button onClick={logout} className="icon-text-btn" type="button">
               <LogOut size={16} />
               <span>Log Out</span>

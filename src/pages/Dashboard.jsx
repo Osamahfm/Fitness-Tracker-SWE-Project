@@ -1,7 +1,8 @@
+import { Link } from 'react-router-dom';
 import { useAppContext } from '../context/useAppContext';
-import { Activity, CalendarCheck2, Flame, Footprints, ShieldCheck, Target, Timer, Trophy, Zap } from 'lucide-react';
+import { Activity, ArrowRight, CalendarCheck2, Flame, Footprints, ShieldCheck, Target, Timer, Trophy, Zap } from 'lucide-react';
 import { getActivityInsights, getDailyCalorieTarget, getUserActivityMetrics } from '../utils/userMetrics';
-import { getRoleDashboardMessage, getRoleProfile } from '../utils/userRoles';
+import { getRoleDashboardMessage, getRoleInterface, getRoleProfile } from '../utils/userRoles';
 
 export default function Dashboard() {
   const { state } = useAppContext();
@@ -13,7 +14,39 @@ export default function Dashboard() {
   const latestActivity = metrics.latestActivity;
   const hasWeeklyData = metrics.weeklyActivity.some((day) => day.count > 0);
   const roleProfile = getRoleProfile(state.profile.role);
+  const roleInterface = getRoleInterface(state.profile.role);
   const roleMessage = getRoleDashboardMessage(state.profile.role, state.profile.name);
+  const metricCards = [
+    {
+      key: 'calories',
+      Icon: Flame,
+      label: roleInterface.metrics.calories.label,
+      value: metrics.today.calories,
+      copy: roleInterface.metrics.calories.copy(metrics.today.count),
+      accent: true
+    },
+    {
+      key: 'distance',
+      Icon: Footprints,
+      label: roleInterface.metrics.distance.label,
+      value: `${metrics.today.distance.toFixed(1)} km`,
+      copy: roleInterface.metrics.distance.copy
+    },
+    {
+      key: 'time',
+      Icon: Timer,
+      label: roleInterface.metrics.time.label,
+      value: `${metrics.week.duration} min`,
+      copy: roleInterface.metrics.time.copy
+    },
+    {
+      key: 'goal',
+      Icon: Target,
+      label: roleInterface.metrics.goal.label,
+      value: state.profile.goal.replace('User ', ''),
+      copy: roleInterface.metrics.goal.copy
+    }
+  ];
 
   return (
     <section className="home-screen">
@@ -32,59 +65,58 @@ export default function Dashboard() {
         </div>
       </div>
 
+      <section className="role-action-grid" aria-label={`${roleProfile.label} quick actions`}>
+        {roleInterface.actions.map((action) => (
+          <Link key={action.to} className="role-action-card" to={action.to}>
+            <div>
+              <strong>{action.label}</strong>
+              <span>{action.description}</span>
+            </div>
+            <ArrowRight size={18} />
+          </Link>
+        ))}
+      </section>
+
       <section className="insight-strip" aria-label="Personal activity insights">
         <article>
           <CalendarCheck2 size={20} />
           <div>
-            <span>Active Days</span>
+            <span>{roleInterface.insights.activeDays}</span>
             <strong>{insights.activeDays}/7</strong>
           </div>
         </article>
         <article>
           <Trophy size={20} />
           <div>
-            <span>Best Day</span>
+            <span>{roleInterface.insights.bestDay}</span>
             <strong>{insights.bestDay?.calories ? `${insights.bestDay.label} ${insights.bestDay.calories}` : 'Pending'}</strong>
           </div>
         </article>
         <article>
           <Zap size={20} />
           <div>
-            <span>Current Streak</span>
+            <span>{roleInterface.insights.streak}</span>
             <strong>{insights.streak} day{insights.streak === 1 ? '' : 's'}</strong>
           </div>
         </article>
       </section>
 
       <section className="dashboard-grid">
-        <article className="metric-card accent-card">
-          <span><Flame size={18} /> Today's Calories</span>
-          <strong>{metrics.today.calories}</strong>
-          <p>From {metrics.today.count} activity record(s) saved by this user today.</p>
-        </article>
-        <article className="metric-card">
-          <span><Footprints size={18} /> Today's Distance</span>
-          <strong>{metrics.today.distance.toFixed(1)} km</strong>
-          <p>Only this logged-in user's saved distance is counted here.</p>
-        </article>
-        <article className="metric-card">
-          <span><Timer size={18} /> Weekly Time</span>
-          <strong>{metrics.week.duration} min</strong>
-          <p>Workout minutes from the last seven calendar days.</p>
-        </article>
-        <article className="metric-card">
-          <span><Target size={18} /> Current Goal</span>
-          <strong>{state.profile.goal.replace('User ', '')}</strong>
-          <p>Daily burn target is personalized from profile weight and goal.</p>
-        </article>
+        {metricCards.map(({ key, Icon, label, value, copy, accent }) => (
+          <article key={key} className={`metric-card ${accent ? 'accent-card' : ''}`}>
+            <span><Icon size={18} /> {label}</span>
+            <strong>{value}</strong>
+            <p>{copy}</p>
+          </article>
+        ))}
       </section>
 
       <section className="workspace two-column">
         <div className="panel">
           <div className="panel-heading">
-            <p className="eyebrow">Workout Overview</p>
-            <h3>Weekly activity</h3>
-            <p className="panel-copy">Calories grouped from this user's real saved activity records.</p>
+            <p className="eyebrow">{roleInterface.chart.eyebrow}</p>
+            <h3>{roleInterface.chart.title}</h3>
+            <p className="panel-copy">{roleInterface.chart.copy}</p>
           </div>
           <div className={`bar-chart ${hasWeeklyData ? '' : 'empty-chart'}`} aria-label="Weekly activity chart">
             {metrics.weeklyActivity.map((day) => (
@@ -101,20 +133,20 @@ export default function Dashboard() {
 
         <div className="panel focus-panel">
           <div className="panel-heading">
-            <p className="eyebrow">Next Best Move</p>
-            <h3>{latestActivity?.label || 'No activity yet'}</h3>
+            <p className="eyebrow">{roleInterface.focus.eyebrow}</p>
+            <h3>{latestActivity?.label || roleInterface.focus.emptyTitle}</h3>
           </div>
           <div className="session-card">
             <Activity size={28} />
             <div>
-              <strong>{latestActivity ? `${latestActivity.calories} calories` : 'Start tracking'}</strong>
-              <span>{latestActivity ? `${latestActivity.distance.toFixed(1)} km in ${latestActivity.duration} min` : 'Add your first workout to unlock analytics.'}</span>
+              <strong>{latestActivity ? `${latestActivity.calories} calories` : roleInterface.focus.emptyValue}</strong>
+              <span>{latestActivity ? `${latestActivity.distance.toFixed(1)} km in ${latestActivity.duration} min` : roleInterface.focus.emptyCopy}</span>
             </div>
           </div>
           <div className="coach-card">
-            <span>{insights.consistencyScore}% consistency</span>
+            <span>{roleInterface.focus.badge(insights.consistencyScore)}</span>
             <p>{insights.focusMessage}</p>
-            <small>Favorite activity: {insights.favoriteActivity} - Avg burn: {insights.averageDailyCalories} cal/day</small>
+            <small>{roleInterface.focus.detail(insights)}</small>
           </div>
         </div>
       </section>

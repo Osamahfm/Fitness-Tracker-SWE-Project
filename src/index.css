@@ -205,6 +205,14 @@ button {
   font-weight: 800;
 }
 
+.role-badge.role-trainer {
+  color: var(--accent-2);
+}
+
+.role-badge.role-admin {
+  color: var(--warning);
+}
+
 .dot {
   width: 9px;
   height: 9px;
@@ -332,6 +340,53 @@ button {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
+}
+
+.role-action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.role-action-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 104px;
+  padding: 18px;
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+  text-decoration: none;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.role-action-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(85, 244, 189, 0.32);
+  background: rgba(255, 255, 255, 0.075);
+}
+
+.role-action-card strong,
+.role-action-card span {
+  display: block;
+}
+
+.role-action-card strong {
+  margin-bottom: 6px;
+  font-size: 18px;
+}
+
+.role-action-card span {
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.role-action-card svg {
+  flex: 0 0 auto;
+  color: var(--accent);
 }
 
 .insight-strip {
@@ -1194,6 +1249,7 @@ tr:last-child td {
   }
 
   .dashboard-grid,
+  .role-action-grid,
   .insight-strip,
   .two-column,
   .form-grid,

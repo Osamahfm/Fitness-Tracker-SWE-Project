@@ -2,9 +2,42 @@ import { useMemo, useState } from 'react';
 import { useAppContext } from '../context/useAppContext';
 import { CalendarDays, Download, Flame, Footprints, Search, Trash2, Timer } from 'lucide-react';
 import { getUserActivityMetrics } from '../utils/userMetrics';
+import { getRoleProfile } from '../utils/userRoles';
+
+const reportsPageByRole = {
+  customer: {
+    dateLabel: 'Report Date',
+    distanceLabel: 'Total Distance',
+    durationLabel: 'Total Duration',
+    caloriesLabel: 'Total Calories',
+    eyebrow: 'Daily Reports',
+    title: 'Saved Activity Records',
+    copy: 'Review, audit, and clean up the activity history used by your dashboard.'
+  },
+  trainer: {
+    dateLabel: 'Review Date',
+    distanceLabel: 'Client Distance',
+    durationLabel: 'Client Duration',
+    caloriesLabel: 'Client Calories',
+    eyebrow: 'Client Analytics',
+    title: 'Coaching Activity Records',
+    copy: 'Filter session history, review client workload, and export coaching records.'
+  },
+  admin: {
+    dateLabel: 'Audit Date',
+    distanceLabel: 'Stored Distance',
+    durationLabel: 'Stored Duration',
+    caloriesLabel: 'Calculated Calories',
+    eyebrow: 'Data Reports',
+    title: 'Activity Data Audit',
+    copy: 'Inspect saved records, validate calculations, and export data for system checks.'
+  }
+};
 
 export default function Reports() {
   const { state, deleteActivity, showToast } = useAppContext();
+  const role = getRoleProfile(state.profile.role).value;
+  const pageCopy = reportsPageByRole[role] || reportsPageByRole.customer;
   const [filters, setFilters] = useState({
     search: '',
     activity: 'all',
@@ -85,22 +118,22 @@ export default function Reports() {
     <section className="workspace">
       <div className="dashboard-grid">
         <article className="metric-card">
-          <span><CalendarDays size={18} /> Report Date</span>
+          <span><CalendarDays size={18} /> {pageCopy.dateLabel}</span>
           <strong>{latestDate}</strong>
           <p>Daily report generated from saved user records.</p>
         </article>
         <article className="metric-card">
-          <span><Footprints size={18} /> Total Distance</span>
+          <span><Footprints size={18} /> {pageCopy.distanceLabel}</span>
           <strong>{metrics.total.distance.toFixed(1)} km</strong>
           <p>Distance from this user's manual activity entries.</p>
         </article>
         <article className="metric-card">
-          <span><Timer size={18} /> Total Duration</span>
+          <span><Timer size={18} /> {pageCopy.durationLabel}</span>
           <strong>{metrics.total.duration} min</strong>
           <p>All saved workout minutes for the current user.</p>
         </article>
         <article className="metric-card accent-card">
-          <span><Flame size={18} /> Total Calories</span>
+          <span><Flame size={18} /> {pageCopy.caloriesLabel}</span>
           <strong>{metrics.total.calories}</strong>
           <p>Calculated burned calories for the report.</p>
         </article>
@@ -108,9 +141,9 @@ export default function Reports() {
 
       <div className="panel">
         <div className="panel-heading">
-          <p className="eyebrow">Daily Reports</p>
-          <h3>Saved Activity Records</h3>
-          <p className="panel-copy">Review, audit, and clean up the activity history used by your dashboard.</p>
+          <p className="eyebrow">{pageCopy.eyebrow}</p>
+          <h3>{pageCopy.title}</h3>
+          <p className="panel-copy">{pageCopy.copy}</p>
         </div>
         <div className="report-toolbar">
           <label className="search-field">
