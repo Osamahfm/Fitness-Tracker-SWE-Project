@@ -52,6 +52,11 @@ RewriteRule ^api/activities/(.*)$ backend/api/activities.php [L,QSA]
 RewriteRule ^api/meals/(.*)$ backend/api/meals.php [L,QSA]
 RewriteRule ^api/goals/(.*)$ backend/api/goals.php [L,QSA]
 RewriteRule ^api/dashboard/(.*)$ backend/api/dashboard.php [L,QSA]
+RewriteRule ^api/wellness/(.*)$ backend/api/wellness.php [L,QSA]
+RewriteRule ^api/workouts/(.*)$ backend/api/workouts.php [L,QSA]
+RewriteRule ^api/analytics/(.*)$ backend/api/analytics.php [L,QSA]
+RewriteRule ^api/profile$ backend/api/profile.php [L,QSA]
+RewriteRule ^api/profile/(.*)$ backend/api/profile.php [L,QSA]
 RewriteRule ^api/(.*)$ backend/api/$1.php [L,QSA]
 
 # Frontend Routes - serve from public directory

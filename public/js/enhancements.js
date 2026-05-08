@@ -384,9 +384,13 @@ class FitnessTrackerEnhancements {
      * Charts Setup
      */
     setupCharts() {
-        // Load Chart.js dynamically
+        if (typeof Chart !== 'undefined') {
+            this.chartsReady = true;
+            this.initializeCharts();
+            return;
+        }
         const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js';
         script.onload = () => {
             this.chartsReady = true;
             this.initializeCharts();
@@ -498,7 +502,8 @@ class FitnessTrackerEnhancements {
     }
 
     addDarkModeToggle() {
-        const header = document.querySelector('nav .flex.items-center');
+        if (document.getElementById('theme-toggle') || document.getElementById('dark-mode-toggle')) return;
+        const header = document.querySelector('#landing-view nav .flex.items-center');
         if (!header) return;
 
         const toggleBtn = document.createElement('button');

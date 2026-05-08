@@ -4,8 +4,11 @@
  * Handles user registration, login, and session management
  */
 
+require_once __DIR__ . '/../config/Config.php';
+require_once __DIR__ . '/../helpers/ValidationHelper.php';
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/UserSession.php';
+require_once __DIR__ . '/../models/PasswordReset.php';
 require_once __DIR__ . '/RBACService.php';
 
 class AuthService {
@@ -129,21 +132,67 @@ class AuthService {
     }
 
     /**
-     * Request password reset
+     * Request password reset — stores hashed token; returns plaintext token for demo when APP_DEBUG is true.
+     *
+     * @return array{success:bool, message:string, demo_token?:string}
      */
-    public function requestPasswordReset(string $email): bool {
+    public function requestPasswordReset(string $email): array {
+        $email = strtolower(trim($email));
         $user = $this->userModel->findByEmail($email);
+
         if (!$user) {
-            return false; // Don't reveal if email exists or not
+            return [
+                'success' => true,
+                'message' => 'If an account exists for this email, reset instructions have been recorded.',
+            ];
         }
 
-        // Generate reset token (in real app, would send email)
-        $resetToken = bin2hex(random_bytes(32));
+        $plaintext = bin2hex(random_bytes(32));
+        $tokenHash = hash('sha256', $plaintext);
         $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
-        // Store reset token in database (would need a password_resets table)
-        // For now, just return true
-        return true;
+        $resetModel = new PasswordReset();
+        $resetModel->createToken($email, $tokenHash, $expiresAt);
+
+        $out = [
+            'success' => true,
+            'message' => 'If an account exists for this email, you can complete the reset with your token.',
+        ];
+
+        if (Config::getBoolean('APP_DEBUG', false)) {
+            $out['demo_token'] = $plaintext;
+        }
+        return $out;
+    }
+
+    /**
+     * Complete password reset with a one-time token.
+     */
+    public function resetPasswordWithToken(string $token, string $newPassword): array {
+        if (strlen($newPassword) < 8) {
+            throw new Exception('Password must be at least 8 characters');
+        }
+
+        $resetModel = new PasswordReset();
+        $email = $resetModel->consumeValidToken($token);
+        if (!$email) {
+            return ['success' => false, 'message' => 'Invalid or expired reset token'];
+        }
+
+        $user = $this->userModel->findByEmail($email);
+        if (!$user) {
+            return ['success' => false, 'message' => 'User not found'];
+        }
+
+        if (!ValidationHelper::isValidPassword($newPassword)) {
+            throw new Exception('Password must include uppercase, lowercase, number, and special character');
+        }
+
+        $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $this->userModel->updatePasswordHash((int) $user['user_id'], $hash);
+        $this->sessionModel->invalidateAllForUser((int) $user['user_id']);
+
+        return ['success' => true, 'message' => 'Password updated successfully'];
     }
 
     /**

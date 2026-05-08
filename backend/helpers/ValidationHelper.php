@@ -70,8 +70,9 @@ class ValidationHelper {
      * Validate activity level
      */
     public static function isValidActivityLevel(string $level): bool {
-        $valid = ['sedentary', 'lightly_active', 'moderately_active', 'very_active', 'extremely_active'];
-        return in_array(strtolower($level), $valid);
+        // Matches `users.activity_level` ENUM in database/schema.sql
+        $valid = ['sedentary', 'light', 'moderate', 'active', 'very_active'];
+        return in_array(strtolower($level), $valid, true);
     }
 
     /**
@@ -106,7 +107,7 @@ class ValidationHelper {
      */
     public static function validateRegistrationData(array $data): array {
         $errors = [];
-        $required = ['email', 'username', 'password', 'first_name', 'last_name', 'gender', 'height_cm', 'weight_kg', 'activity_level'];
+        $required = ['email', 'username', 'password', 'first_name', 'last_name', 'date_of_birth', 'gender', 'height_cm', 'weight_kg', 'activity_level'];
         
         // Check required fields
         $errors = array_merge($errors, self::validateRequired($data, $required));
@@ -124,6 +125,10 @@ class ValidationHelper {
         // Validate username
         if (isset($data['username']) && !self::isValidUsername($data['username'])) {
             $errors['username'] = 'Username must be 3-20 characters, alphanumeric and underscore only';
+        }
+
+        if (isset($data['date_of_birth']) && !self::isValidDate($data['date_of_birth'])) {
+            $errors['date_of_birth'] = 'Invalid date of birth';
         }
 
         // Validate gender

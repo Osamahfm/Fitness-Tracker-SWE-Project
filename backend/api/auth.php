@@ -65,6 +65,12 @@ try {
                 case 'change-password':
                     handleChangePassword();
                     break;
+                case 'forgot-password':
+                    handleForgotPassword();
+                    break;
+                case 'reset-password':
+                    handleResetPassword();
+                    break;
                 default:
                     sendErrorResponse('Invalid endpoint', 404);
             }
@@ -226,6 +232,49 @@ function handleValidateSession() {
 /**
  * Handle password change
  */
+/**
+ * Password reset request (stores token; optional demo_token when APP_DEBUG=true)
+ */
+function handleForgotPassword() {
+    global $authService;
+
+    $input = json_decode(file_get_contents('php://input'), true);
+    if (!$input || empty($input['email'])) {
+        sendErrorResponse('Email is required', 400);
+    }
+    $email = ValidationHelper::sanitizeEmail($input['email']);
+    if (!ValidationHelper::isValidEmail($email)) {
+        sendErrorResponse('Invalid email', 422);
+    }
+
+    try {
+        $result = $authService->requestPasswordReset($email);
+        sendJsonResponse(array_merge(['success' => true], $result), 200);
+    } catch (Exception $e) {
+        sendErrorResponse($e->getMessage(), 400);
+    }
+}
+
+/**
+ * Complete reset with token + new password
+ */
+function handleResetPassword() {
+    global $authService;
+
+    $input = json_decode(file_get_contents('php://input'), true);
+    if (!$input || empty($input['token']) || empty($input['new_password'])) {
+        sendErrorResponse('Token and new_password are required', 400);
+    }
+
+    try {
+        $result = $authService->resetPasswordWithToken($input['token'], $input['new_password']);
+        $code = $result['success'] ? 200 : 400;
+        sendJsonResponse($result, $code);
+    } catch (Exception $e) {
+        sendErrorResponse($e->getMessage(), 400);
+    }
+}
+
 function handleChangePassword() {
     global $authService;
     

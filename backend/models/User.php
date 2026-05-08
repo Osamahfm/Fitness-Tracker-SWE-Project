@@ -111,6 +111,17 @@ class User {
     }
 
     /**
+     * Update password hash (used by reset flow and admin tools).
+     */
+    public function updatePasswordHash(int $userId, string $passwordHash): bool {
+        $query = "UPDATE {$this->table} SET password_hash = :password_hash WHERE user_id = :user_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':password_hash', $passwordHash);
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    /**
      * Check if email exists
      */
     public function emailExists(string $email): bool {

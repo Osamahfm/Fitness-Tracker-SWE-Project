@@ -86,6 +86,16 @@ class UserSession {
     }
 
     /**
+     * Invalidate all sessions for a user (e.g. after password reset).
+     */
+    public function invalidateAllForUser(int $userId): bool {
+        $query = "UPDATE {$this->table} SET is_active = FALSE WHERE user_id = :user_id AND is_active = TRUE";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    /**
      * Clean up expired sessions
      */
     public function cleanupExpired(): int {
