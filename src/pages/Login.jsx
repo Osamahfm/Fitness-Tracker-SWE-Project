@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, ArrowRight, LockKeyhole, Mail, Scale, Target, UserRound } from 'lucide-react';
+import { Activity, ArrowRight, LockKeyhole, Mail, Scale, ShieldCheck, Target, UserRound } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
+import { roleOptions } from '../utils/userRoles';
 
 export default function Login() {
   const { state, registerUser, loginUser, showToast } = useAppContext();
@@ -21,6 +22,7 @@ export default function Login() {
     const email = formData.get('email');
     const password = formData.get('password');
     const name = formData.get('name') || email.split('@')[0];
+    const role = formData.get('role') || 'customer';
     const goal = formData.get('goal') || 'Body Recompose';
     const weight = Number(formData.get('weight') || 75);
 
@@ -31,7 +33,7 @@ export default function Login() {
     setLoading(true);
     try {
       if (isRegister) {
-        await registerUser({ name, email, password, goal, weight });
+        await registerUser({ name, email, password, role, goal, weight });
       } else {
         await loginUser({ email, password });
       }
@@ -50,9 +52,9 @@ export default function Login() {
         <p className="eyebrow">FitFlow</p>
         <h1>Fitness tracking that feels clear, fast, and focused.</h1>
         <div className="auth-stats">
-          <span>Calories</span>
-          <span>Workouts</span>
-          <span>Goals</span>
+          <span>Customer</span>
+          <span>Trainer</span>
+          <span>Admin</span>
         </div>
       </div>
 
@@ -71,6 +73,14 @@ export default function Login() {
           )}
           {isRegister && (
             <>
+              <label>
+                <span><ShieldCheck size={18} /> Account Role</span>
+                <select name="role" defaultValue="customer">
+                  {roleOptions.map((roleOption) => (
+                    <option key={roleOption.value} value={roleOption.value}>{roleOption.label}</option>
+                  ))}
+                </select>
+              </label>
               <label>
                 <span><Target size={18} /> Fitness Goal</span>
                 <select name="goal" defaultValue="Body Recompose">

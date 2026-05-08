@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { BadgeCheck, Mail, Scale, Target, UserRound } from 'lucide-react';
+import { BadgeCheck, Mail, Scale, ShieldCheck, Target, UserRound } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
+import { getRoleProfile, roleOptions } from '../utils/userRoles';
 
 export default function Profile() {
   const { state, updateProfile, showToast } = useAppContext();
@@ -8,9 +9,12 @@ export default function Profile() {
   const [formData, setFormData] = useState({
     name: state.profile.name || '',
     email: state.profile.email || '',
+    role: state.profile.role || 'customer',
     goal: state.profile.goal || 'Body Recompose',
     weight: state.profile.weight || 75
   });
+
+  const roleProfile = getRoleProfile(formData.role);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,6 +49,14 @@ export default function Profile() {
             <input type="email" name="email" value={formData.email} onChange={handleChange} required />
           </label>
           <label className="field-card">
+            <span><ShieldCheck size={18} /> Account role</span>
+            <select name="role" value={formData.role} onChange={handleChange}>
+              {roleOptions.map((roleOption) => (
+                <option key={roleOption.value} value={roleOption.value}>{roleOption.label}</option>
+              ))}
+            </select>
+          </label>
+          <label className="field-card">
             <span><Target size={18} /> Fitness goal</span>
             <select name="goal" value={formData.goal} onChange={handleChange}>
               <option>Body Recompose</option>
@@ -70,11 +82,13 @@ export default function Profile() {
           <div>
             <strong>{state.profile.name}</strong>
             <span>{state.profile.email}</span>
+            <span>{roleProfile.label} - {roleProfile.description}</span>
           </div>
         </div>
-        <p className="panel-copy">{state.profile.validated ? `${state.profile.name} is fully set up for daily physical activity records.` : "Complete the account details to validate the user profile."}</p>
+        <p className="panel-copy">{state.profile.validated ? `${state.profile.name} is fully set up as a ${roleProfile.label.toLowerCase()} account.` : "Complete the account details to validate the user profile."}</p>
         <div className="checklist">
           <span><BadgeCheck size={16} /> Profile details</span>
+          <span><BadgeCheck size={16} /> Account role</span>
           <span><BadgeCheck size={16} /> Fitness goals</span>
           <span><BadgeCheck size={16} /> Readiness</span>
         </div>

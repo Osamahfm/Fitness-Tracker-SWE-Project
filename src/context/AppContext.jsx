@@ -6,6 +6,7 @@ const initialState = {
   profile: {
     name: "",
     email: "",
+    role: "customer",
     goal: "Body Recompose",
     weight: 75,
     validated: false
@@ -71,10 +72,10 @@ export const AppProvider = ({ children }) => {
     setState((s) => ({ ...s, profile: data.profile }));
   };
 
-  const registerUser = async ({ name, email, password, goal, weight }) => {
+  const registerUser = async ({ name, email, password, role, goal, weight }) => {
     const data = await api('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ name, email, password, goal, weight })
+      body: JSON.stringify({ name, email, password, role, goal, weight })
     });
     setToken(data.token);
     clearFormDrafts();

@@ -13,6 +13,7 @@ import {
   UserRound
 } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
+import { getRoleProfile } from '../utils/userRoles';
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: Home, end: true },
@@ -28,6 +29,7 @@ export default function Layout() {
   const { state, logout, showToast } = useAppContext();
   const navigate = useNavigate();
   const location = useLocation();
+  const roleProfile = getRoleProfile(state.profile.role);
 
   useEffect(() => {
     if (!state.profile.email || !state.profile.name) {
@@ -80,6 +82,10 @@ export default function Layout() {
             <span>Goal</span>
             <strong>{state.profile.goal.replace('User ', '')}</strong>
           </div>
+          <div className="target">
+            <span>Role</span>
+            <strong>{roleProfile.label}</strong>
+          </div>
         </div>
       </aside>
 
@@ -94,6 +100,7 @@ export default function Layout() {
               <span className={`dot ${state.profile.validated ? 'valid' : ''}`}></span>
               <span>{state.profile.name}</span>
             </div>
+            <div className="role-badge">{roleProfile.label}</div>
             <button onClick={logout} className="icon-text-btn" type="button">
               <LogOut size={16} />
               <span>Log Out</span>

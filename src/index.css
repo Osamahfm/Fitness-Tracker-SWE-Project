@@ -181,7 +181,8 @@ button {
 }
 
 .profile-pill,
-.icon-text-btn {
+.icon-text-btn,
+.role-badge {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -196,6 +197,12 @@ button {
 
 .icon-text-btn {
   color: var(--text-secondary);
+}
+
+.role-badge {
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .dot {
@@ -259,11 +266,28 @@ button {
   line-height: 0.95;
 }
 
-.hero-copy p:last-child {
+.hero-copy > p:not(.eyebrow) {
   max-width: 520px;
   color: var(--text-secondary);
   font-size: 18px;
   line-height: 1.55;
+}
+
+.hero-role-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-height: 34px;
+  margin-top: 18px;
+  padding: 7px 11px;
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.07);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
 }
 
 .activity-ring {

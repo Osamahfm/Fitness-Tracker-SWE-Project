@@ -1,6 +1,7 @@
 import { useAppContext } from '../context/useAppContext';
-import { Activity, CalendarCheck2, Flame, Footprints, Target, Timer, Trophy, Zap } from 'lucide-react';
+import { Activity, CalendarCheck2, Flame, Footprints, ShieldCheck, Target, Timer, Trophy, Zap } from 'lucide-react';
 import { getActivityInsights, getDailyCalorieTarget, getUserActivityMetrics } from '../utils/userMetrics';
+import { getRoleDashboardMessage, getRoleProfile } from '../utils/userRoles';
 
 export default function Dashboard() {
   const { state } = useAppContext();
@@ -11,14 +12,17 @@ export default function Dashboard() {
   const progress = Math.min(Math.round((metrics.today.calories / dailyCalorieTarget) * 100), 100);
   const latestActivity = metrics.latestActivity;
   const hasWeeklyData = metrics.weeklyActivity.some((day) => day.count > 0);
+  const roleProfile = getRoleProfile(state.profile.role);
+  const roleMessage = getRoleDashboardMessage(state.profile.role, state.profile.name);
 
   return (
     <section className="home-screen">
       <div className="hero-panel">
         <div className="hero-copy">
           <p className="eyebrow">Hello, {state.profile.name}</p>
-          <h3>Ready for your next move?</h3>
-          <p>Track workouts, calories, meals, and reminders from one focused dashboard.</p>
+          <h3>{roleProfile.label} workspace</h3>
+          <p>{roleMessage}</p>
+          <span className="hero-role-tag"><ShieldCheck size={15} /> {roleProfile.description}</span>
         </div>
         <div className="activity-ring" style={{ '--progress': `${progress * 3.6}deg` }}>
           <div>

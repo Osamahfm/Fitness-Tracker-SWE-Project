@@ -5,6 +5,7 @@ import { readDb, updateDb } from './database.js';
 
 const PORT = Number(process.env.PORT || 4174);
 const startedAt = Date.now();
+const validRoles = new Set(['customer', 'trainer', 'admin']);
 
 function json(res, status, data) {
   res.writeHead(status, {
@@ -34,11 +35,17 @@ async function body(req) {
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));
 }
 
+function normalizeRole(role) {
+  const value = String(role || 'customer').trim().toLowerCase();
+  return validRoles.has(value) ? value : 'customer';
+}
+
 function publicProfile(user) {
   return {
     id: user.id,
     name: user.name,
     email: user.email,
+    role: normalizeRole(user.role),
     goal: user.goal,
     weight: user.weight,
     validated: true
@@ -105,6 +112,7 @@ async function route(req, res) {
         id: randomBytes(12).toString('hex'),
         name: String(payload.name).trim(),
         email,
+        role: normalizeRole(payload.role),
         goal: payload.goal || "Body Recompose",
         weight: Number(payload.weight || 75),
         passwordSalt: passwordData.salt,
@@ -160,6 +168,7 @@ async function route(req, res) {
       const found = db.users.find((item) => item.id === user.id);
       found.name = String(payload.name || found.name).trim();
       found.email = String(payload.email || found.email).trim().toLowerCase();
+      found.role = normalizeRole(payload.role || found.role);
       found.goal = payload.goal || found.goal;
       found.weight = Number(payload.weight || found.weight);
       found.validated = true;
