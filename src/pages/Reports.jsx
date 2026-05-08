@@ -1,13 +1,12 @@
 import { useAppContext } from '../context/useAppContext';
 import { CalendarDays, Flame, Footprints, Trash2, Timer } from 'lucide-react';
+import { getUserActivityMetrics } from '../utils/userMetrics';
 
 export default function Reports() {
   const { state, deleteActivity, showToast } = useAppContext();
 
-  const totalCalories = state.activities.reduce((sum, activity) => sum + activity.calories, 0);
-  const totalDistance = state.activities.reduce((sum, activity) => sum + activity.distance, 0);
-  const totalDuration = state.activities.reduce((sum, activity) => sum + activity.duration, 0);
-  const latestDate = state.activities[0]?.date || new Date().toLocaleDateString();
+  const metrics = getUserActivityMetrics(state.activities);
+  const latestDate = metrics.latestActivity?.date || new Date().toLocaleDateString();
 
   const handleDelete = async (id) => {
     try {
@@ -28,17 +27,17 @@ export default function Reports() {
         </article>
         <article className="metric-card">
           <span><Footprints size={18} /> Total Distance</span>
-          <strong>{totalDistance.toFixed(1)} km</strong>
-          <p>Distance from manual activity entries.</p>
+          <strong>{metrics.total.distance.toFixed(1)} km</strong>
+          <p>Distance from this user's manual activity entries.</p>
         </article>
         <article className="metric-card">
           <span><Timer size={18} /> Total Duration</span>
-          <strong>{totalDuration} min</strong>
-          <p>Workout time recorded today.</p>
+          <strong>{metrics.total.duration} min</strong>
+          <p>All saved workout minutes for the current user.</p>
         </article>
         <article className="metric-card accent-card">
           <span><Flame size={18} /> Total Calories</span>
-          <strong>{totalCalories}</strong>
+          <strong>{metrics.total.calories}</strong>
           <p>Calculated burned calories for the report.</p>
         </article>
       </div>

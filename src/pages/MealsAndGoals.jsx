@@ -1,5 +1,6 @@
 import { useAppContext } from '../context/useAppContext';
 import { Flame, Footprints, Salad, Target } from 'lucide-react';
+import { getUserActivityMetrics } from '../utils/userMetrics';
 
 const mealsHighCal = ["Grilled Chicken Breast with Quinoa", "Salmon with Sweet Potato Mash", "Large Tuna Salad with Olive Oil"];
 const mealsLowCal = ["Greek Yogurt with Mixed Berries", "Avocado Toast with a Poached Egg", "Protein Shake with Almond Milk"];
@@ -7,38 +8,40 @@ const mealsLowCal = ["Greek Yogurt with Mixed Berries", "Avocado Toast with a Po
 export default function MealsAndGoals() {
   const { state } = useAppContext();
 
-  const totalCalories = state.activities.reduce((sum, activity) => sum + activity.calories, 0);
-  const totalDistance = state.activities.reduce((sum, activity) => sum + activity.distance, 0);
+  const metrics = getUserActivityMetrics(state.activities);
+  const activityCalories = metrics.today.count > 0 ? metrics.today.calories : metrics.week.calories;
+  const activityDistance = metrics.today.count > 0 ? metrics.today.distance : metrics.week.distance;
 
-  const suggestedMeal = totalCalories >= 500 
-    ? mealsHighCal[Math.floor(totalCalories % mealsHighCal.length)] // Deterministic based on calories
-    : mealsLowCal[Math.floor(totalCalories % mealsLowCal.length)];
+  const suggestedMeal = activityCalories >= 500
+    ? mealsHighCal[Math.floor(activityCalories % mealsHighCal.length)]
+    : mealsLowCal[Math.floor(activityCalories % mealsLowCal.length)];
 
   const mealText = state.activities.length === 0
     ? "Save activity data to generate a meal suggestion."
-    : (totalCalories >= 500
+    : (activityCalories >= 500
       ? `High energy output detected! We recommend: ${suggestedMeal}.`
       : `Light activity day. We recommend: ${suggestedMeal}.`);
 
   const goalText = state.activities.length === 0
     ? "Validate the user and save activity data to generate a goal suggestion."
-    : (totalDistance >= 5
+    : (activityDistance >= 5
       ? "Goal suggestion: maintain consistency and increase weekly distance gradually."
       : "Goal suggestion: add one more short activity session to improve daily tracking progress.");
 
   const isReady = state.activities.length > 0;
+  const activeWindow = metrics.today.count > 0 ? "today's" : "this week's";
 
   return (
     <section className="workspace">
       <div className="dashboard-grid">
         <article className="metric-card">
           <span><Flame size={18} /> Energy Output</span>
-          <strong>{totalCalories}</strong>
-          <p>Burned calories guide meal intensity and recovery needs.</p>
+          <strong>{activityCalories}</strong>
+          <p>Using {activeWindow} real activity data for this logged-in user.</p>
         </article>
         <article className="metric-card">
           <span><Footprints size={18} /> Movement Volume</span>
-          <strong>{totalDistance.toFixed(1)} km</strong>
+          <strong>{activityDistance.toFixed(1)} km</strong>
           <p>Distance helps tune the next achievable daily target.</p>
         </article>
         <article className="metric-card accent-card">
@@ -64,7 +67,7 @@ export default function MealsAndGoals() {
           {mealText}
         </div>
         <div className="mini-list">
-          {(totalCalories >= 500 ? mealsHighCal : mealsLowCal).map((meal) => (
+          {(activityCalories >= 500 ? mealsHighCal : mealsLowCal).map((meal) => (
             <span key={meal}>{meal}</span>
           ))}
         </div>

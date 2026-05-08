@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, ArrowRight, LockKeyhole, Mail, UserRound } from 'lucide-react';
+import { Activity, ArrowRight, LockKeyhole, Mail, Scale, Target, UserRound } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
 
 export default function Login() {
@@ -21,6 +21,8 @@ export default function Login() {
     const email = formData.get('email');
     const password = formData.get('password');
     const name = formData.get('name') || email.split('@')[0];
+    const goal = formData.get('goal') || 'Body Recompose';
+    const weight = Number(formData.get('weight') || 75);
 
     if (password.length < 6) {
       return showToast("Password must be at least 6 characters.", true);
@@ -29,7 +31,7 @@ export default function Login() {
     setLoading(true);
     try {
       if (isRegister) {
-        await registerUser({ name, email, password });
+        await registerUser({ name, email, password, goal, weight });
       } else {
         await loginUser({ email, password });
       }
@@ -66,6 +68,22 @@ export default function Login() {
               <span><UserRound size={18} /> Full Name</span>
               <input type="text" name="name" placeholder="Enter your name" required />
             </label>
+          )}
+          {isRegister && (
+            <>
+              <label>
+                <span><Target size={18} /> Fitness Goal</span>
+                <select name="goal" defaultValue="Body Recompose">
+                  <option>Body Recompose</option>
+                  <option>Maintain Body Weight</option>
+                  <option>Achieve User Goal</option>
+                </select>
+              </label>
+              <label>
+                <span><Scale size={18} /> Body Weight (kg)</span>
+                <input type="number" name="weight" min="30" max="250" defaultValue="75" required />
+              </label>
+            </>
           )}
           <label>
             <span><Mail size={18} /> Email</span>

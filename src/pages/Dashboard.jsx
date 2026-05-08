@@ -1,14 +1,15 @@
 import { useAppContext } from '../context/useAppContext';
 import { Activity, Flame, Footprints, Target, Timer } from 'lucide-react';
+import { getDailyCalorieTarget, getUserActivityMetrics } from '../utils/userMetrics';
 
 export default function Dashboard() {
   const { state } = useAppContext();
 
-  const totalCalories = state.activities.reduce((sum, activity) => sum + activity.calories, 0);
-  const totalDistance = state.activities.reduce((sum, activity) => sum + activity.distance, 0);
-  const totalDuration = state.activities.reduce((sum, activity) => sum + activity.duration, 0);
-  const progress = Math.min(Math.round((totalCalories / 650) * 100), 100);
-  const latestActivity = state.activities[0];
+  const metrics = getUserActivityMetrics(state.activities);
+  const dailyCalorieTarget = getDailyCalorieTarget(state.profile);
+  const progress = Math.min(Math.round((metrics.today.calories / dailyCalorieTarget) * 100), 100);
+  const latestActivity = metrics.latestActivity;
+  const hasWeeklyData = metrics.weeklyActivity.some((day) => day.count > 0);
 
   return (
     <section className="home-screen">
@@ -21,31 +22,31 @@ export default function Dashboard() {
         <div className="activity-ring" style={{ '--progress': `${progress * 3.6}deg` }}>
           <div>
             <strong>{progress}%</strong>
-            <span>daily burn</span>
+            <span>today's goal</span>
           </div>
         </div>
       </div>
 
       <section className="dashboard-grid">
         <article className="metric-card accent-card">
-          <span><Flame size={18} /> Calories Burned</span>
-          <strong>{totalCalories}</strong>
-          <p>Calculated from physical activity distance, duration, and intensity.</p>
+          <span><Flame size={18} /> Today's Calories</span>
+          <strong>{metrics.today.calories}</strong>
+          <p>From {metrics.today.count} activity record(s) saved by this user today.</p>
         </article>
         <article className="metric-card">
-          <span><Footprints size={18} /> Distance</span>
-          <strong>{totalDistance.toFixed(1)} km</strong>
-          <p>Manual activity input, as defined by the project assumptions.</p>
+          <span><Footprints size={18} /> Today's Distance</span>
+          <strong>{metrics.today.distance.toFixed(1)} km</strong>
+          <p>Only this logged-in user's saved distance is counted here.</p>
         </article>
         <article className="metric-card">
-          <span><Timer size={18} /> Active Time</span>
-          <strong>{totalDuration} min</strong>
-          <p>Total workout time recorded across your saved activity records.</p>
+          <span><Timer size={18} /> Weekly Time</span>
+          <strong>{metrics.week.duration} min</strong>
+          <p>Workout minutes from the last seven calendar days.</p>
         </article>
         <article className="metric-card">
           <span><Target size={18} /> Current Goal</span>
           <strong>{state.profile.goal.replace('User ', '')}</strong>
-          <p>Recommendations update from profile and activity data.</p>
+          <p>Daily burn target is personalized from profile weight and goal.</p>
         </article>
       </section>
 
@@ -53,11 +54,18 @@ export default function Dashboard() {
         <div className="panel">
           <div className="panel-heading">
             <p className="eyebrow">Workout Overview</p>
-            <h3>Weekly Activity</h3>
+            <h3>Weekly activity</h3>
+            <p className="panel-copy">Calories grouped from this user's real saved activity records.</p>
           </div>
-          <div className="bar-chart" aria-label="Weekly activity chart">
-            {[54, 72, 38, 88, 64, 96, Math.max(progress, 22)].map((height, index) => (
-              <span key={index} style={{ '--height': `${height}%` }}></span>
+          <div className={`bar-chart ${hasWeeklyData ? '' : 'empty-chart'}`} aria-label="Weekly activity chart">
+            {metrics.weeklyActivity.map((day) => (
+              <span
+                key={day.key}
+                style={{ '--height': `${day.height}%` }}
+                title={`${day.label}: ${day.calories} calories`}
+              >
+                <small>{day.label}</small>
+              </span>
             ))}
           </div>
         </div>

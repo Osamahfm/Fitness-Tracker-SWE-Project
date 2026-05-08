@@ -62,10 +62,10 @@ export const AppProvider = ({ children }) => {
     setState((s) => ({ ...s, profile: data.profile }));
   };
 
-  const registerUser = async ({ name, email, password }) => {
+  const registerUser = async ({ name, email, password, goal, weight }) => {
     const data = await api('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ name, email, password })
+      body: JSON.stringify({ name, email, password, goal, weight })
     });
     setToken(data.token);
     setState((s) => ({ ...s, profile: data.profile, activities: [], alarm: null, uatSignoffs: [] }));

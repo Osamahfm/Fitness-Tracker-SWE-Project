@@ -403,15 +403,32 @@ button {
   align-items: end;
   gap: 12px;
   height: 220px;
-  padding-top: 20px;
+  padding: 20px 0 28px;
 }
 
 .bar-chart span {
+  position: relative;
   min-width: 0;
   height: var(--height);
   border-radius: 999px 999px 10px 10px;
   background: linear-gradient(180deg, var(--accent), var(--accent-2));
   box-shadow: 0 10px 24px rgba(85, 244, 189, 0.16);
+}
+
+.bar-chart.empty-chart span {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+}
+
+.bar-chart small {
+  position: absolute;
+  right: 0;
+  bottom: -24px;
+  left: 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
 }
 
 .session-card {
