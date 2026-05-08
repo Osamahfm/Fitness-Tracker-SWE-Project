@@ -6,14 +6,19 @@
 
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/UserSession.php';
+require_once __DIR__ . '/RBACService.php';
 
 class AuthService {
     private $userModel;
     private $sessionModel;
+    private $rbacService;
+    private $currentUser;
     
     public function __construct() {
         $this->userModel = new User();
         $this->sessionModel = new UserSession();
+        $this->rbacService = new RBACService();
+        $this->currentUser = null;
     }
 
     /**
@@ -188,12 +193,23 @@ class AuthService {
         if (!in_array($userData['activity_level'], ['sedentary', 'light', 'moderate', 'active', 'very_active'])) {
             throw new Exception("Invalid activity level");
         }
+
+        // Validate role if provided
+        if (isset($userData['role'])) {
+            if (!in_array($userData['role'], ['customer', 'trainer', 'admin'])) {
+                throw new Exception("Invalid role value");
+            }
+            // For now, only allow customer registration (admin accounts created separately)
+            if ($userData['role'] !== 'customer') {
+                throw new Exception("Role must be 'customer' for registration");
+            }
+        }
     }
 
     /**
      * Create default goal for new user
      */
-    private function createDefaultGoal(int $userId): void {
+    public function createDefaultGoal(int $userId): void {
         $goalModel = new Goal();
         $calorieCalculator = new CalorieCalculator();
         
@@ -230,5 +246,33 @@ class AuthService {
     private function getCurrentSessionId(): string {
         // This would typically come from session management
         return '';
+    }
+
+    /**
+     * Check if user has permission (RBAC wrapper)
+     */
+    public function hasPermission(int $userId, string $permission): bool {
+        return $this->rbacService->hasPermission($userId, $permission);
+    }
+
+    /**
+     * Get user role
+     */
+    public function getUserRole(int $userId): ?string {
+        return $this->rbacService->getUserRole($userId);
+    }
+
+    /**
+     * Check if user can access another user's data
+     */
+    public function canAccessUserData(int $userId, int $targetUserId, string $resource): bool {
+        return $this->rbacService->canAccessUserData($userId, $targetUserId, $resource);
+    }
+
+    /**
+     * Get navigation items for user role
+     */
+    public function getNavigationForRole(string $role): array {
+        return $this->rbacService->getNavigationForRole($role);
     }
 }

@@ -15,10 +15,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../services/AuthService.php';
+require_once __DIR__ . '/../services/RBACService.php';
 require_once __DIR__ . '/../models/Activity.php';
 require_once __DIR__ . '/../services/CalorieCalculator.php';
 
 $authService = new AuthService();
+$rbacService = new RBACService();
 $activityModel = new Activity();
 $calorieCalculator = new CalorieCalculator();
 
@@ -115,17 +117,27 @@ function handleCreateActivity() {
  * Handle getting activities
  */
 function handleGetActivities() {
-    global $activityModel, $userId;
+    global $activityModel, $userId, $rbacService;
     
     $date = $_GET['date'] ?? date('Y-m-d');
     $startDate = $_GET['start_date'] ?? null;
     $endDate = $_GET['end_date'] ?? null;
     $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 10;
     
+    // Check if requesting another user's activities
+    $targetUserId = $_GET['user_id'] ?? $userId;
+    
+    // Verify access permissions
+    if ($targetUserId != $userId) {
+        if (!$rbacService->canAccessUserData($userId, (int) $targetUserId, 'activity')) {
+            sendErrorResponse('Cannot access this user\'s activities', 403);
+        }
+    }
+    
     if ($startDate && $endDate) {
-        $activities = $activityModel->getActivitiesByDateRange($userId, $startDate, $endDate);
+        $activities = $activityModel->getActivitiesByDateRange((int) $targetUserId, $startDate, $endDate);
     } else {
-        $activities = $activityModel->getActivitiesByDate($userId, $date);
+        $activities = $activityModel->getActivitiesByDate((int) $targetUserId, $date);
     }
     
     // Format activities for frontend

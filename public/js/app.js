@@ -6,7 +6,7 @@
 class FitnessTracker {
     constructor() {
         this.currentUser = null;
-        this.apiBaseUrl = '../backend/api/';
+        this.apiBaseUrl = './api/';
         this.init();
     }
 
@@ -48,6 +48,7 @@ class FitnessTracker {
             if (response.success) {
                 this.currentUser = response.user;
                 this.updateUIForAuthenticatedUser();
+                this.loadRoleBasedInterface();
             } else {
                 this.showAuthModal();
             }
@@ -397,6 +398,267 @@ class FitnessTracker {
 
         return await response.json();
     }
+
+    /**
+     * Load role-based interface
+     */
+    async loadRoleBasedInterface() {
+        if (!this.currentUser) return;
+
+        const userRole = this.currentUser.role || 'customer';
+        
+        // Load role-based navigation
+        await this.loadNavigation(userRole);
+        
+        // Show/hide sections based on role
+        this.updateSectionsForRole(userRole);
+        
+        // Load role-specific data
+        if (userRole === 'trainer') {
+            this.loadTrainerData();
+        } else if (userRole === 'admin') {
+            this.loadAdminData();
+        }
+    }
+
+    /**
+     * Load navigation based on user role
+     */
+    async loadNavigation(role) {
+        try {
+            // For now, use predefined navigation (in a real app, this would come from API)
+            const navigationItems = this.getNavigationForRole(role);
+            const navMenu = document.getElementById('navigation-menu');
+            
+            navMenu.innerHTML = navigationItems.map(item => `
+                <a href="${item.href}" class="nav-link text-gray-500 hover:text-gray-900 hover:bg-indigo-50 px-3 py-2 rounded-md text-sm font-medium">
+                    <i class="${item.icon} mr-1"></i>${item.name}
+                </a>
+            `).join('');
+            
+            // Re-attach navigation event listeners
+            navMenu.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => this.handleNavigation(e));
+            });
+            
+        } catch (error) {
+            console.error('Failed to load navigation:', error);
+        }
+    }
+
+    /**
+     * Get navigation items for role
+     */
+    getNavigationForRole(role) {
+        const navigation = {
+            customer: [
+                {name: 'Dashboard', href: '#dashboard', icon: 'fas fa-home'},
+                {name: 'Activities', href: '#activities', icon: 'fas fa-running'},
+                {name: 'Meals', href: '#meals', icon: 'fas fa-utensils'},
+                {name: 'Goals', href: '#goals', icon: 'fas fa-bullseye'},
+                {name: 'Reports', href: '#reports', icon: 'fas fa-chart-line'}
+            ],
+            trainer: [
+                {name: 'Dashboard', href: '#dashboard', icon: 'fas fa-home'},
+                {name: 'My Clients', href: '#clients', icon: 'fas fa-users'},
+                {name: 'Workout Plans', href: '#workout-plans', icon: 'fas fa-dumbbell'},
+                {name: 'Client Progress', href: '#progress', icon: 'fas fa-chart-line'},
+                {name: 'Activities', href: '#activities', icon: 'fas fa-running'},
+                {name: 'Meals', href: '#meals', icon: 'fas fa-utensils'},
+                {name: 'Goals', href: '#goals', icon: 'fas fa-bullseye'}
+            ],
+            admin: [
+                {name: 'Dashboard', href: '#dashboard', icon: 'fas fa-home'},
+                {name: 'User Management', href: '#users', icon: 'fas fa-users-cog'},
+                {name: 'Role Management', href: '#roles', icon: 'fas fa-user-shield'},
+                {name: 'Trainer Assignments', href: '#assignments', icon: 'fas fa-user-check'},
+                {name: 'System Reports', href: '#system-reports', icon: 'fas fa-chart-bar'},
+                {name: 'Activities', href: '#activities', icon: 'fas fa-running'},
+                {name: 'Meals', href: '#meals', icon: 'fas fa-utensils'},
+                {name: 'Goals', href: '#goals', icon: 'fas fa-bullseye'}
+            ]
+        };
+
+        return navigation[role] || navigation.customer;
+    }
+
+    /**
+     * Update sections visibility based on role
+     */
+    updateSectionsForRole(role) {
+        // Hide all role-specific sections
+        document.getElementById('trainer-section').classList.add('hidden');
+        document.getElementById('admin-section').classList.add('hidden');
+        
+        // Show relevant section
+        if (role === 'trainer') {
+            document.getElementById('trainer-section').classList.remove('hidden');
+            document.getElementById('dashboard-section').classList.add('hidden');
+        } else if (role === 'admin') {
+            document.getElementById('admin-section').classList.remove('hidden');
+            document.getElementById('dashboard-section').classList.add('hidden');
+        } else {
+            // Customer - show regular dashboard
+            document.getElementById('dashboard-section').classList.remove('hidden');
+        }
+    }
+
+    /**
+     * Load trainer-specific data
+     */
+    async loadTrainerData() {
+        try {
+            // Load trainer's clients
+            const clientsResponse = await this.apiCall('trainers?endpoint=clients', 'GET');
+            if (clientsResponse.success) {
+                this.displayClients(clientsResponse.clients);
+                document.getElementById('client-count').textContent = clientsResponse.total;
+            }
+
+            // Load available clients for assignment
+            const availableResponse = await this.apiCall('trainers?endpoint=available-clients', 'GET');
+            if (availableResponse.success) {
+                this.displayAvailableClients(availableResponse.available_clients);
+            }
+
+        } catch (error) {
+            console.error('Failed to load trainer data:', error);
+        }
+    }
+
+    /**
+     * Load admin-specific data
+     */
+    async loadAdminData() {
+        try {
+            // Load all users
+            const usersResponse = await this.apiCall('users', 'GET');
+            if (usersResponse.success) {
+                this.displayUsers(usersResponse.users);
+                document.getElementById('total-users').textContent = usersResponse.total;
+            }
+        } catch (error) {
+            console.error('Failed to load admin data:', error);
+        }
+    }
+
+    /**
+     * Display clients list
+     */
+    displayClients(clients) {
+        const clientsList = document.getElementById('clients-list');
+        if (!clients || clients.length === 0) {
+            clientsList.innerHTML = '<p class="text-gray-500">No clients assigned yet.</p>';
+            return;
+        }
+
+        clientsList.innerHTML = clients.map(client => `
+            <div class="border rounded-lg p-3 hover:bg-gray-50">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h4 class="font-semibold">${client.first_name} ${client.last_name}</h4>
+                        <p class="text-sm text-gray-500">${client.email}</p>
+                        <p class="text-xs text-gray-400">Assigned: ${new Date(client.assigned_at).toLocaleDateString()}</p>
+                    </div>
+                    <button onclick="viewClientProgress(${client.client_id})" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                        View Progress
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    /**
+     * Display available clients for assignment
+     */
+    displayAvailableClients(clients) {
+        const availableDiv = document.getElementById('available-clients');
+        if (!clients || clients.length === 0) {
+            availableDiv.innerHTML = '<p class="text-gray-500">No available clients.</p>';
+            return;
+        }
+
+        availableDiv.innerHTML = clients.map(client => `
+            <div class="flex justify-between items-center p-2 border rounded">
+                <div>
+                    <span class="font-medium">${client.first_name} ${client.last_name}</span>
+                    <span class="text-sm text-gray-500 ml-2">${client.email}</span>
+                </div>
+                <button onclick="assignClient(${client.user_id})" class="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700">
+                    Assign
+                </button>
+            </div>
+        `).join('');
+    }
+
+    /**
+     * Display users table (admin)
+     */
+    displayUsers(users) {
+        const usersTable = document.getElementById('users-table');
+        if (!users || users.length === 0) {
+            usersTable.innerHTML = '<p class="text-gray-500">No users found.</p>';
+            return;
+        }
+
+        usersTable.innerHTML = `
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        ${users.map(user => `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">${user.first_name} ${user.last_name}</div>
+                                        <div class="text-sm text-gray-500">${user.email}</div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-${this.getRoleColor(user.role)}-100 text-${this.getRoleColor(user.role)}-800">
+                                        ${user.role}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-${user.is_active ? 'green' : 'red'}-100 text-${user.is_active ? 'green' : 'red'}-800">
+                                        ${user.is_active ? 'Active' : 'Inactive'}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    ${new Date(user.created_at).toLocaleDateString()}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button onclick="toggleUserStatus(${user.user_id}, ${!user.is_active})" class="text-${user.is_active ? 'red' : 'green'}-600 hover:text-${user.is_active ? 'red' : 'green'}-900 mr-2">
+                                        ${user.is_active ? 'Deactivate' : 'Activate'}
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    /**
+     * Get role color for styling
+     */
+    getRoleColor(role) {
+        const colors = {
+            customer: 'blue',
+            trainer: 'green',
+            admin: 'red'
+        };
+        return colors[role] || 'gray';
+    }
 }
 
 // Global functions for HTML onclick handlers
@@ -407,6 +669,88 @@ function closeAuthModal() {
 function hideNotification() {
     window.fitnessTracker.hideNotification();
 }
+
+// Trainer functions
+function viewClientProgress(clientId) {
+    window.fitnessTracker.viewClientProgress(clientId);
+}
+
+function assignClient(clientId) {
+    window.fitnessTracker.assignClient(clientId);
+}
+
+// Admin functions
+function loadUsers(role) {
+    window.fitnessTracker.loadUsersByRole(role);
+}
+
+function loadSystemReport(type) {
+    window.fitnessTracker.loadSystemReport(type);
+}
+
+function toggleUserStatus(userId, activate) {
+    window.fitnessTracker.toggleUserStatus(userId, activate);
+}
+
+// Add these methods to the FitnessTracker class
+FitnessTracker.prototype.viewClientProgress = async function(clientId) {
+    try {
+        const response = await this.apiCall(`trainers?endpoint=client-progress&client_id=${clientId}`, 'GET');
+        if (response.success) {
+            // Display client progress in a modal or dedicated section
+            this.showNotification('Loading client progress...', 'info');
+            console.log('Client progress:', response);
+        }
+    } catch (error) {
+        this.showNotification('Failed to load client progress', 'error');
+    }
+};
+
+FitnessTracker.prototype.assignClient = async function(clientId) {
+    try {
+        const response = await this.apiCall('trainers?action=assign-client', 'POST', { client_id: clientId });
+        if (response.success) {
+            this.showNotification('Client assigned successfully!', 'success');
+            this.loadTrainerData(); // Refresh trainer data
+        }
+    } catch (error) {
+        this.showNotification('Failed to assign client', 'error');
+    }
+};
+
+FitnessTracker.prototype.loadUsersByRole = async function(role) {
+    try {
+        const response = await this.apiCall(`users?role=${role}`, 'GET');
+        if (response.success) {
+            this.displayUsers(response.users);
+        }
+    } catch (error) {
+        this.showNotification('Failed to load users', 'error');
+    }
+};
+
+FitnessTracker.prototype.loadSystemReport = async function(type) {
+    try {
+        this.showNotification(`Loading ${type} report...`, 'info');
+        // This would load system reports
+        console.log('Loading system report:', type);
+    } catch (error) {
+        this.showNotification('Failed to load report', 'error');
+    }
+};
+
+FitnessTracker.prototype.toggleUserStatus = async function(userId, activate) {
+    try {
+        const action = activate ? 'activate' : 'deactivate';
+        const response = await this.apiCall(`users?id=${userId}&action=${action}`, 'DELETE');
+        if (response.success) {
+            this.showNotification(`User ${action}d successfully!`, 'success');
+            this.loadAdminData(); // Refresh admin data
+        }
+    } catch (error) {
+        this.showNotification(`Failed to ${action} user`, 'error');
+    }
+};
 
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {

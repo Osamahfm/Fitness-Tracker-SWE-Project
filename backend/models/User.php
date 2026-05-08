@@ -20,9 +20,9 @@ class User {
     public function create(array $userData): int {
         $query = "INSERT INTO {$this->table} 
                  (username, email, password_hash, first_name, last_name, date_of_birth, 
-                  gender, height_cm, weight_kg, activity_level) 
+                  gender, height_cm, weight_kg, activity_level, role) 
                  VALUES (:username, :email, :password_hash, :first_name, :last_name, 
-                  :date_of_birth, :gender, :height_cm, :weight_kg, :activity_level)";
+                  :date_of_birth, :gender, :height_cm, :weight_kg, :activity_level, :role)";
 
         $stmt = $this->db->prepare($query);
         
@@ -36,6 +36,8 @@ class User {
         $stmt->bindParam(':height_cm', $userData['height_cm']);
         $stmt->bindParam(':weight_kg', $userData['weight_kg']);
         $stmt->bindParam(':activity_level', $userData['activity_level']);
+        $role = isset($userData['role']) ? $userData['role'] : 'customer';
+        $stmt->bindParam(':role', $role);
 
         $stmt->execute();
         return $this->db->lastInsertId();
@@ -168,5 +170,67 @@ class User {
         $dob = new DateTime($dateOfBirth);
         $today = new DateTime();
         return $today->diff($dob)->y;
+    }
+
+    /**
+     * Update user role
+     */
+    public function updateRole(int $userId, string $role): bool {
+        $query = "UPDATE {$this->table} SET role = :role WHERE user_id = :user_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':role', $role);
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    /**
+     * Get users by role
+     */
+    public function getUsersByRole(string $role): array {
+        $query = "SELECT user_id, username, email, first_name, last_name, created_at 
+                 FROM {$this->table} 
+                 WHERE role = :role AND is_active = TRUE 
+                 ORDER BY created_at DESC";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':role', $role);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Get all users (admin function)
+     */
+    public function getAllUsers(): array {
+        $query = "SELECT user_id, username, email, first_name, last_name, role, 
+                        is_active, created_at 
+                 FROM {$this->table} 
+                 ORDER BY created_at DESC";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Deactivate user (admin function)
+     */
+    public function deactivateUser(int $userId): bool {
+        $query = "UPDATE {$this->table} SET is_active = FALSE WHERE user_id = :user_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    /**
+     * Activate user (admin function)
+     */
+    public function activateUser(int $userId): bool {
+        $query = "UPDATE {$this->table} SET is_active = TRUE WHERE user_id = :user_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        return $stmt->execute();
     }
 }
