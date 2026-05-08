@@ -310,6 +310,44 @@ button {
   gap: 18px;
 }
 
+.insight-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.insight-strip article {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-height: 88px;
+  padding: 16px;
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.insight-strip svg {
+  flex: 0 0 auto;
+  color: var(--accent);
+}
+
+.insight-strip span,
+.coach-card span,
+.coach-card small,
+.report-toolbar label > span {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.insight-strip strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 22px;
+  line-height: 1.1;
+}
+
 .metric-card,
 .panel {
   border: 1px solid var(--panel-border);
@@ -459,6 +497,25 @@ button {
 .session-card span {
   color: var(--text-secondary);
   line-height: 1.45;
+}
+
+.coach-card {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 16px;
+  border: 1px solid rgba(90, 183, 255, 0.18);
+  border-radius: 18px;
+  background: rgba(90, 183, 255, 0.075);
+}
+
+.coach-card p {
+  line-height: 1.45;
+}
+
+.coach-card small {
+  color: var(--text-muted);
+  line-height: 1.35;
 }
 
 .form-grid {
@@ -876,6 +933,55 @@ button[type='submit'] {
   background: rgba(255, 255, 255, 0.04);
 }
 
+.report-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.3fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr) auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 14px;
+}
+
+.report-toolbar label {
+  display: grid;
+  gap: 7px;
+}
+
+.report-toolbar label > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.report-toolbar .toolbar-action {
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+.report-toolbar button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.report-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.report-summary span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 7px 11px;
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.045);
+  font-size: 13px;
+  font-weight: 800;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -1064,6 +1170,7 @@ tr:last-child td {
   }
 
   .dashboard-grid,
+  .insight-strip,
   .two-column,
   .form-grid,
   .hero-panel {
@@ -1086,6 +1193,10 @@ tr:last-child td {
 
   .progress-track {
     width: 100%;
+  }
+
+  .report-toolbar {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -33,6 +33,43 @@ function sumActivities(activities) {
   );
 }
 
+function getActivityDaySet(activities) {
+  return new Set(
+    activities
+      .map((activity) => {
+        const activityDate = toActivityDate(activity);
+        return activityDate ? dayKey(activityDate) : null;
+      })
+      .filter(Boolean)
+  );
+}
+
+function getActivityStreak(activities, now = new Date()) {
+  const activeDays = getActivityDaySet(activities);
+  const cursor = new Date(now);
+  cursor.setHours(0, 0, 0, 0);
+
+  let streak = 0;
+  while (activeDays.has(dayKey(cursor))) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  return streak;
+}
+
+function getFavoriteActivity(activities) {
+  if (!activities.length) return null;
+
+  const counts = activities.reduce((activityCounts, activity) => {
+    const label = activity.label || 'Activity';
+    activityCounts.set(label, (activityCounts.get(label) || 0) + 1);
+    return activityCounts;
+  }, new Map());
+
+  return [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+}
+
 export function getTodayActivities(activities, now = new Date()) {
   const today = dayKey(now);
   return activities.filter((activity) => {
@@ -112,4 +149,40 @@ export function getDailyCalorieTarget(profile) {
   if (goal.includes('maintain')) return Math.max(baseTarget, 450);
   if (goal.includes('recompose')) return Math.max(baseTarget + 100, 550);
   return Math.max(baseTarget + 150, 600);
+}
+
+export function getActivityInsights(activities, dailyCalorieTarget, now = new Date()) {
+  const metrics = getUserActivityMetrics(activities);
+  const activeDays = metrics.weeklyActivity.filter((day) => day.count > 0).length;
+  const bestDay = metrics.weeklyActivity.reduce(
+    (best, day) => (day.calories > best.calories ? day : best),
+    metrics.weeklyActivity[0]
+  );
+  const remainingCalories = Math.max(dailyCalorieTarget - metrics.today.calories, 0);
+  const averageDailyCalories = Math.round(metrics.week.calories / 7);
+  const streak = getActivityStreak(activities, now);
+  const favoriteActivity = getFavoriteActivity(activities);
+  const consistencyScore = Math.round((activeDays / 7) * 100);
+
+  let focusMessage = 'Log a workout to unlock weekly coaching insights.';
+  if (metrics.today.count > 0 && remainingCalories === 0) {
+    focusMessage = 'Daily calorie goal reached. Keep the next session light or focus on recovery.';
+  } else if (metrics.today.count > 0) {
+    focusMessage = `${remainingCalories} calories left to reach today's burn target.`;
+  } else if (activeDays >= 4) {
+    focusMessage = 'Your week has momentum. Add a short session today to keep the streak alive.';
+  } else if (activities.length > 0) {
+    focusMessage = 'Start today with a manageable session and rebuild weekly consistency.';
+  }
+
+  return {
+    activeDays,
+    averageDailyCalories,
+    bestDay,
+    consistencyScore,
+    favoriteActivity: favoriteActivity || 'Not enough data',
+    focusMessage,
+    remainingCalories,
+    streak
+  };
 }

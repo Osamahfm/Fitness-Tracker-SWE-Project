@@ -1,12 +1,13 @@
 import { useAppContext } from '../context/useAppContext';
-import { Activity, Flame, Footprints, Target, Timer } from 'lucide-react';
-import { getDailyCalorieTarget, getUserActivityMetrics } from '../utils/userMetrics';
+import { Activity, CalendarCheck2, Flame, Footprints, Target, Timer, Trophy, Zap } from 'lucide-react';
+import { getActivityInsights, getDailyCalorieTarget, getUserActivityMetrics } from '../utils/userMetrics';
 
 export default function Dashboard() {
   const { state } = useAppContext();
 
   const metrics = getUserActivityMetrics(state.activities);
   const dailyCalorieTarget = getDailyCalorieTarget(state.profile);
+  const insights = getActivityInsights(state.activities, dailyCalorieTarget);
   const progress = Math.min(Math.round((metrics.today.calories / dailyCalorieTarget) * 100), 100);
   const latestActivity = metrics.latestActivity;
   const hasWeeklyData = metrics.weeklyActivity.some((day) => day.count > 0);
@@ -26,6 +27,30 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <section className="insight-strip" aria-label="Personal activity insights">
+        <article>
+          <CalendarCheck2 size={20} />
+          <div>
+            <span>Active Days</span>
+            <strong>{insights.activeDays}/7</strong>
+          </div>
+        </article>
+        <article>
+          <Trophy size={20} />
+          <div>
+            <span>Best Day</span>
+            <strong>{insights.bestDay?.calories ? `${insights.bestDay.label} ${insights.bestDay.calories}` : 'Pending'}</strong>
+          </div>
+        </article>
+        <article>
+          <Zap size={20} />
+          <div>
+            <span>Current Streak</span>
+            <strong>{insights.streak} day{insights.streak === 1 ? '' : 's'}</strong>
+          </div>
+        </article>
+      </section>
 
       <section className="dashboard-grid">
         <article className="metric-card accent-card">
@@ -72,7 +97,7 @@ export default function Dashboard() {
 
         <div className="panel focus-panel">
           <div className="panel-heading">
-            <p className="eyebrow">Latest Session</p>
+            <p className="eyebrow">Next Best Move</p>
             <h3>{latestActivity?.label || 'No activity yet'}</h3>
           </div>
           <div className="session-card">
@@ -81,6 +106,11 @@ export default function Dashboard() {
               <strong>{latestActivity ? `${latestActivity.calories} calories` : 'Start tracking'}</strong>
               <span>{latestActivity ? `${latestActivity.distance.toFixed(1)} km in ${latestActivity.duration} min` : 'Add your first workout to unlock analytics.'}</span>
             </div>
+          </div>
+          <div className="coach-card">
+            <span>{insights.consistencyScore}% consistency</span>
+            <p>{insights.focusMessage}</p>
+            <small>Favorite activity: {insights.favoriteActivity} - Avg burn: {insights.averageDailyCalories} cal/day</small>
           </div>
         </div>
       </section>
