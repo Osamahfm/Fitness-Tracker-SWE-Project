@@ -373,6 +373,7 @@ body.theme-light .bg-app {
 .theme-light .glass {
     background: rgba(255, 255, 255, 0.72);
     border-color: rgba(15, 23, 42, 0.06) !important;
+    color: #0f172a;
 }
 
 .text-gradient {
@@ -451,10 +452,87 @@ body.theme-light {
     color: #0f172a;
 }
 
-body.theme-light .glass,
 body.theme-light .text-slate-100,
 body.theme-light .text-slate-300 {
-    color: inherit;
+    color: #334155;
+}
+
+/**
+ * Form fields: explicit text/background so typed text and placeholders stay readable.
+ * (Avoids light-gray-on-white when OS/browser restyles inputs or theme toggles.)
+ */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+select,
+textarea {
+    color: #f1f5f9;
+    background-color: rgba(15, 23, 42, 0.85);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #94a3b8;
+    opacity: 1;
+}
+
+select {
+    color: #f1f5f9;
+}
+
+select option {
+    color: #0f172a;
+    background-color: #f8fafc;
+}
+
+/* Date / time native controls: keep icon visible on dark fields */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.75;
+}
+
+body.theme-light input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+body.theme-light select,
+body.theme-light textarea {
+    color: #0f172a !important;
+    background-color: #ffffff !important;
+    border-color: rgba(15, 23, 42, 0.18) !important;
+}
+
+body.theme-light input::placeholder,
+body.theme-light textarea::placeholder {
+    color: #64748b !important;
+}
+
+body.theme-light select {
+    color: #0f172a !important;
+}
+
+body.theme-light input[type="date"]::-webkit-calendar-picker-indicator,
+body.theme-light input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: none;
+    opacity: 1;
+}
+
+body.theme-light #auth-modal .text-slate-400,
+body.theme-light #auth-modal .text-slate-500 {
+    color: #475569 !important;
+}
+
+/* Autofill: stop Chrome from washing out text */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #f1f5f9;
+    transition: background-color 5000s ease-in-out 0s;
+    box-shadow: 0 0 0px 1000px rgba(15, 23, 42, 0.85) inset;
+}
+
+body.theme-light input:-webkit-autofill,
+body.theme-light input:-webkit-autofill:hover,
+body.theme-light input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #0f172a !important;
+    box-shadow: 0 0 0px 1000px #ffffff inset !important;
 }
 
 /* Dark Mode Support (Optional) */
