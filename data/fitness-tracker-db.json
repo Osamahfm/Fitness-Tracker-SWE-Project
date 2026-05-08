@@ -54,6 +54,18 @@
       "passwordHash": "8083fb81a190c36ce417cd59433d932b0813025ca41d22b62a17905a7425e031ae9d1ec66ebc1d8eeb2298b344adfbde0da760f1779a9ba38477f1bb25836665",
       "validated": true,
       "createdAt": "2026-05-08T20:04:54.904Z"
+    },
+    {
+      "id": "8624945ea00e49bd174c96be",
+      "name": "Osama Osama Hamada Fathy Mohamed",
+      "email": "osama2303898@miuegypt.edu.eg",
+      "role": "admin",
+      "goal": "Body Recompose",
+      "weight": 75,
+      "passwordSalt": "44b54d3a82cc71f9eb7bc5f0311f9723",
+      "passwordHash": "2e34b41169f1917f99a0fb2522f809992415bc4be2aea3ac396cce88c2d1b8bc1c31a931f8ec8f8a30d9f54d2322ddf48c0864fd0d888c9ff24a7332167b0428",
+      "validated": true,
+      "createdAt": "2026-05-08T20:38:35.186Z"
     }
   ],
   "sessions": [
@@ -91,6 +103,16 @@
       "token": "e059189fd3f620ea4578c8bda98cbbfa647b83115d7e951c",
       "userId": "165cb5030c692870e71bd081",
       "createdAt": "2026-05-08T20:28:27.898Z"
+    },
+    {
+      "token": "9a7bf54b4593bda134d380ff25abe2b5f27cc55687607604",
+      "userId": "165cb5030c692870e71bd081",
+      "createdAt": "2026-05-08T20:38:11.106Z"
+    },
+    {
+      "token": "bc1c1dcce4661adf42dedbeb9cfb514e8a4097e3a4f6b138",
+      "userId": "8624945ea00e49bd174c96be",
+      "createdAt": "2026-05-08T20:38:35.186Z"
     }
   ],
   "activities": [
