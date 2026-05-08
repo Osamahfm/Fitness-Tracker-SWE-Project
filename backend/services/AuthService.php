@@ -1,0 +1,234 @@
+<?php
+/**
+ * Authentication Service
+ * Handles user registration, login, and session management
+ */
+
+require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../models/UserSession.php';
+
+class AuthService {
+    private $userModel;
+    private $sessionModel;
+    
+    public function __construct() {
+        $this->userModel = new User();
+        $this->sessionModel = new UserSession();
+    }
+
+    /**
+     * Register a new user
+     */
+    public function register(array $userData): array {
+        // Validate required fields
+        $this->validateRegistrationData($userData);
+
+        // Check if user already exists
+        if ($this->userModel->emailExists($userData['email'])) {
+            throw new Exception("Email already registered");
+        }
+
+        if ($this->userModel->usernameExists($userData['username'])) {
+            throw new Exception("Username already taken");
+        }
+
+        // Hash password
+        $userData['password_hash'] = password_hash($userData['password'], PASSWORD_DEFAULT);
+        unset($userData['password']);
+
+        // Create user
+        $userId = $this->userModel->create($userData);
+
+        // Create initial goal for the user
+        $this->createDefaultGoal($userId);
+
+        return [
+            'success' => true,
+            'user_id' => $userId,
+            'message' => 'Registration successful'
+        ];
+    }
+
+    /**
+     * User login
+     */
+    public function login(string $email, string $password, string $ipAddress, string $userAgent): array {
+        // Find user by email
+        $user = $this->userModel->findByEmail($email);
+        if (!$user) {
+            throw new Exception("Invalid email or password");
+        }
+
+        // Verify password
+        if (!password_verify($password, $user['password_hash'])) {
+            throw new Exception("Invalid email or password");
+        }
+
+        // Create session
+        $sessionId = $this->sessionModel->create($user['user_id'], $ipAddress, $userAgent);
+
+        return [
+            'success' => true,
+            'user_id' => $user['user_id'],
+            'session_id' => $sessionId,
+            'user' => $this->sanitizeUserData($user)
+        ];
+    }
+
+    /**
+     * User logout
+     */
+    public function logout(string $sessionId): bool {
+        return $this->sessionModel->invalidate($sessionId);
+    }
+
+    /**
+     * Validate user session
+     */
+    public function validateSession(string $sessionId, string $ipAddress): ?array {
+        $session = $this->sessionModel->findValid($sessionId, $ipAddress);
+        if (!$session) {
+            return null;
+        }
+
+        $user = $this->userModel->findById($session['user_id']);
+        if (!$user) {
+            return null;
+        }
+
+        return $this->sanitizeUserData($user);
+    }
+
+    /**
+     * Change password
+     */
+    public function changePassword(int $userId, string $currentPassword, string $newPassword): bool {
+        $user = $this->userModel->findById($userId);
+        if (!$user) {
+            throw new Exception("User not found");
+        }
+
+        // Verify current password
+        if (!password_verify($currentPassword, $user['password_hash'])) {
+            throw new Exception("Current password is incorrect");
+        }
+
+        // Update password
+        $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $this->userModel->update($userId, ['password_hash' => $newPasswordHash]);
+
+        // Invalidate all sessions except current one
+        $this->sessionModel->invalidateAllExcept($userId, $this->getCurrentSessionId());
+
+        return true;
+    }
+
+    /**
+     * Request password reset
+     */
+    public function requestPasswordReset(string $email): bool {
+        $user = $this->userModel->findByEmail($email);
+        if (!$user) {
+            return false; // Don't reveal if email exists or not
+        }
+
+        // Generate reset token (in real app, would send email)
+        $resetToken = bin2hex(random_bytes(32));
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+        // Store reset token in database (would need a password_resets table)
+        // For now, just return true
+        return true;
+    }
+
+    /**
+     * Validate registration data
+     */
+    private function validateRegistrationData(array $userData): void {
+        $requiredFields = ['username', 'email', 'password', 'first_name', 'last_name', 
+                          'date_of_birth', 'gender', 'height_cm', 'weight_kg', 'activity_level'];
+
+        foreach ($requiredFields as $field) {
+            if (empty($userData[$field])) {
+                throw new Exception("Field '{$field}' is required");
+            }
+        }
+
+        // Validate email format
+        if (!filter_var($userData['email'], FILTER_VALIDATE_EMAIL)) {
+            throw new Exception("Invalid email format");
+        }
+
+        // Validate password strength
+        if (strlen($userData['password']) < 8) {
+            throw new Exception("Password must be at least 8 characters long");
+        }
+
+        // Validate age (must be at least 13)
+        $age = $this->calculateAge($userData['date_of_birth']);
+        if ($age < 13) {
+            throw new Exception("User must be at least 13 years old");
+        }
+
+        // Validate height and weight ranges
+        if ($userData['height_cm'] < 100 || $userData['height_cm'] > 250) {
+            throw new Exception("Height must be between 100cm and 250cm");
+        }
+
+        if ($userData['weight_kg'] < 30 || $userData['weight_kg'] > 300) {
+            throw new Exception("Weight must be between 30kg and 300kg");
+        }
+
+        // Validate gender
+        if (!in_array($userData['gender'], ['male', 'female', 'other'])) {
+            throw new Exception("Invalid gender value");
+        }
+
+        // Validate activity level
+        if (!in_array($userData['activity_level'], ['sedentary', 'light', 'moderate', 'active', 'very_active'])) {
+            throw new Exception("Invalid activity level");
+        }
+    }
+
+    /**
+     * Create default goal for new user
+     */
+    private function createDefaultGoal(int $userId): void {
+        $goalModel = new Goal();
+        $calorieCalculator = new CalorieCalculator();
+        
+        $defaultGoal = [
+            'user_id' => $userId,
+            'goal_type' => 'maintenance',
+            'daily_calorie_target' => $calorieCalculator->calculateDailyCalorieTarget($userId, 'maintenance'),
+            'weekly_activity_minutes' => 150
+        ];
+
+        $goalModel->create($defaultGoal);
+    }
+
+    /**
+     * Calculate age from date of birth
+     */
+    private function calculateAge(string $dateOfBirth): int {
+        $dob = new DateTime($dateOfBirth);
+        $today = new DateTime();
+        return $today->diff($dob)->y;
+    }
+
+    /**
+     * Sanitize user data for output
+     */
+    private function sanitizeUserData(array $user): array {
+        unset($user['password_hash']);
+        return $user;
+    }
+
+    /**
+     * Get current session ID (would be from session management)
+     */
+    private function getCurrentSessionId(): string {
+        // This would typically come from session management
+        return '';
+    }
+}

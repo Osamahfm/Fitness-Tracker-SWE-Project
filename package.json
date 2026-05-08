@@ -1,0 +1,23 @@
+{
+  "name": "fitness-tracker",
+  "version": "1.0.0",
+  "description": "A comprehensive web-based fitness tracking platform",
+  "main": "public/index.html",
+  "scripts": {
+    "dev": "php -S localhost:8000 -t public",
+    "start": "php -S localhost:8000 -t public",
+    "setup-db": "mysql -u root -p < database/schema.sql",
+    "test": "echo \"No tests specified\" && exit 1"
+  },
+  "keywords": [
+    "fitness",
+    "tracker",
+    "php",
+    "mysql",
+    "web-app"
+  ],
+  "author": "Fitness Tracker Team",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {}
+}
