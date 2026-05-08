@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { BadgeCheck, Mail, Scale, Target, UserRound } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
 
 export default function Profile() {
@@ -28,30 +29,31 @@ export default function Profile() {
 
   return (
     <section className="workspace two-column">
-      <div className="panel">
+      <div className="panel feature-panel">
         <div className="panel-heading">
           <p className="eyebrow">User Profile & Goals</p>
-          <h3>Account Details</h3>
+          <h3>Account details</h3>
+          <p className="panel-copy">Keep profile details accurate for more useful calorie and goal recommendations.</p>
         </div>
         <form className="form-grid" onSubmit={handleSubmit}>
-          <label>
-            Full name
+          <label className="field-card">
+            <span><UserRound size={18} /> Full name</span>
             <input type="text" name="name" value={formData.name} onChange={handleChange} required />
           </label>
-          <label>
-            Email
+          <label className="field-card">
+            <span><Mail size={18} /> Email</span>
             <input type="email" name="email" value={formData.email} onChange={handleChange} required />
           </label>
-          <label>
-            Fitness goal
+          <label className="field-card">
+            <span><Target size={18} /> Fitness goal</span>
             <select name="goal" value={formData.goal} onChange={handleChange}>
               <option>Body Recompose</option>
               <option>Maintain Body Weight</option>
               <option>Achieve User Goal</option>
             </select>
           </label>
-          <label>
-            Body weight (kg)
+          <label className="field-card">
+            <span><Scale size={18} /> Body weight (kg)</span>
             <input type="number" name="weight" min="30" max="250" value={formData.weight} onChange={handleChange} required />
           </label>
           <button type="submit">Save Profile</button>
@@ -63,11 +65,18 @@ export default function Profile() {
           <p className="eyebrow">Validation Status</p>
           <h3>{state.profile.validated ? "Validated" : "Pending"}</h3>
         </div>
-        <p>{state.profile.validated ? `${state.profile.name} is fully set up for daily physical activity records.` : "Complete the account details to validate the user profile."}</p>
+        <div className="profile-summary">
+          <div className="profile-avatar">{state.profile.name?.slice(0, 2).toUpperCase() || 'FT'}</div>
+          <div>
+            <strong>{state.profile.name}</strong>
+            <span>{state.profile.email}</span>
+          </div>
+        </div>
+        <p className="panel-copy">{state.profile.validated ? `${state.profile.name} is fully set up for daily physical activity records.` : "Complete the account details to validate the user profile."}</p>
         <div className="checklist">
-          <span>Profile details</span>
-          <span>Fitness goals</span>
-          <span>Readiness</span>
+          <span><BadgeCheck size={16} /> Profile details</span>
+          <span><BadgeCheck size={16} /> Fitness goals</span>
+          <span><BadgeCheck size={16} /> Readiness</span>
         </div>
       </div>
     </section>

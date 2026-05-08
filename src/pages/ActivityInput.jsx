@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { AlertCircle, Calculator, CheckCircle2, Dumbbell, Gauge, Route, Timer } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
 import { activityFactors, effortLabels } from '../utils/fitnessMath';
 
@@ -53,30 +54,31 @@ export default function ActivityInput() {
 
   return (
     <section className="workspace two-column">
-      <div className="panel">
+      <div className="panel feature-panel">
         <div className="panel-heading">
           <p className="eyebrow">Physical Activity Tracking Module</p>
-          <h3>Activity Input</h3>
+          <h3>Plan today's session</h3>
+          <p className="panel-copy">Log the workout details your report and nutrition guidance will use.</p>
         </div>
-        <form className="form-grid" onSubmit={handleSubmit}>
-          <label>
-            Activity type
+        <form className="form-grid activity-form" onSubmit={handleSubmit}>
+          <label className="field-card">
+            <span><Dumbbell size={18} /> Activity type</span>
             <select name="type" value={formData.type} onChange={handleChange}>
               {Object.entries(activityFactors).map(([value, activity]) => (
                 <option key={value} value={value}>{activity.label}</option>
               ))}
             </select>
           </label>
-          <label>
-            Distance (km)
+          <label className="field-card">
+            <span><Route size={18} /> Distance (km)</span>
             <input type="number" name="distance" min="0" step="0.1" value={formData.distance} onChange={handleChange} required />
           </label>
-          <label>
-            Duration (minutes)
+          <label className="field-card">
+            <span><Timer size={18} /> Duration (minutes)</span>
             <input type="number" name="duration" min="1" value={formData.duration} onChange={handleChange} required />
           </label>
-          <label>
-            Effort level
+          <label className="field-card">
+            <span><Gauge size={18} /> Effort level</span>
             <select name="effort" value={formData.effort} onChange={handleChange}>
               {Object.entries(effortLabels).map(([value, label]) => (
                 <option key={value} value={value}>{label}</option>
@@ -90,11 +92,15 @@ export default function ActivityInput() {
       <div className="panel">
         <div className="panel-heading">
           <p className="eyebrow">Backend Calories Calculation Engine</p>
-          <h3>Current Estimate</h3>
+          <h3>Current estimate</h3>
+          <p className="panel-copy">Validated server-side before the activity is saved.</p>
         </div>
-        <div className="calorie-result">
-          <strong>{calculation.calories}</strong>
-          <span>calories burned</span>
+        <div className="calorie-result elevated-result">
+          <Calculator size={26} />
+          <div>
+            <strong>{calculation.calories}</strong>
+            <span>calories burned</span>
+          </div>
         </div>
         <div className="formula-box">
           <strong>Formula</strong>
@@ -103,7 +109,7 @@ export default function ActivityInput() {
         <div className="readiness-list compact">
           {calculation.validation.checks.map((check) => (
             <div key={check.label} className={`readiness-item ${check.passed ? 'ready' : ''}`}>
-              <strong>{check.passed ? "Pass" : "Fix"}</strong>
+              <strong>{check.passed ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}</strong>
               <div>
                 <h4>{check.label}</h4>
               </div>

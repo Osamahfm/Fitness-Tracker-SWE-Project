@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AlarmClock, BellRing, Clock, MessageSquareText } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
 
 export default function Alarms() {
@@ -26,34 +27,40 @@ export default function Alarms() {
 
   return (
     <section className="workspace two-column">
-      <div className="panel">
+      <div className="panel feature-panel">
         <div className="panel-heading">
           <p className="eyebrow">Activity Alarm</p>
-          <h3>Workout Reminder</h3>
+          <h3>Workout reminder</h3>
+          <p className="panel-copy">Set a focused reminder for the next workout window.</p>
         </div>
         <form className="form-grid" onSubmit={handleSubmit}>
-          <label>
-            Reminder time
+          <label className="field-card">
+            <span><Clock size={18} /> Reminder time</span>
             <input type="time" name="time" value={formData.time} onChange={handleChange} required />
           </label>
-          <label>
-            Reminder note
+          <label className="field-card">
+            <span><MessageSquareText size={18} /> Reminder note</span>
             <input type="text" name="note" value={formData.note} onChange={handleChange} required />
           </label>
-          <button type="submit">Set Reminder</button>
+          <button type="submit"><AlarmClock size={18} /> Set Reminder</button>
         </form>
       </div>
       <div className="panel">
         <div className="panel-heading">
           <p className="eyebrow">Monitoring & Stabilization</p>
-          <h3>Active Reminder</h3>
+          <h3>Active reminder</h3>
+          <p className="panel-copy">Current reminder state for the daily activity flow.</p>
         </div>
-        <div className={`recommendation-box ${state.alarm ? (state.alarm.triggered ? '' : 'ready') : ''}`}>
-          {state.alarm 
-            ? (state.alarm.triggered 
-                ? `Alarm triggered for ${state.alarm.time}: ${state.alarm.note}`
-                : `Reminder set for ${state.alarm.time}: ${state.alarm.note}`)
-            : "No reminder has been set."}
+        <div className={`reminder-card ${state.alarm ? (state.alarm.triggered ? 'warning' : 'ready') : ''}`}>
+          <BellRing size={30} />
+          <div>
+            <strong>{state.alarm ? state.alarm.time : 'No reminder'}</strong>
+            <span>
+              {state.alarm
+                ? (state.alarm.triggered ? `Triggered: ${state.alarm.note}` : state.alarm.note)
+                : 'No reminder has been set.'}
+            </span>
+          </div>
         </div>
       </div>
     </section>

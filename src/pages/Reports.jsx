@@ -1,4 +1,5 @@
 import { useAppContext } from '../context/useAppContext';
+import { CalendarDays, Flame, Footprints, Trash2, Timer } from 'lucide-react';
 
 export default function Reports() {
   const { state, deleteActivity, showToast } = useAppContext();
@@ -21,22 +22,22 @@ export default function Reports() {
     <section className="workspace">
       <div className="dashboard-grid">
         <article className="metric-card">
-          <span>Report Date</span>
+          <span><CalendarDays size={18} /> Report Date</span>
           <strong>{latestDate}</strong>
           <p>Daily report generated from saved user records.</p>
         </article>
         <article className="metric-card">
-          <span>Total Distance</span>
+          <span><Footprints size={18} /> Total Distance</span>
           <strong>{totalDistance.toFixed(1)} km</strong>
           <p>Distance from manual activity entries.</p>
         </article>
         <article className="metric-card">
-          <span>Total Duration</span>
+          <span><Timer size={18} /> Total Duration</span>
           <strong>{totalDuration} min</strong>
           <p>Workout time recorded today.</p>
         </article>
-        <article className="metric-card">
-          <span>Total Calories</span>
+        <article className="metric-card accent-card">
+          <span><Flame size={18} /> Total Calories</span>
           <strong>{totalCalories}</strong>
           <p>Calculated burned calories for the report.</p>
         </article>
@@ -46,6 +47,7 @@ export default function Reports() {
         <div className="panel-heading">
           <p className="eyebrow">Daily Reports</p>
           <h3>Saved Activity Records</h3>
+          <p className="panel-copy">Review, audit, and clean up the activity history used by your dashboard.</p>
         </div>
         <div className="table-wrap">
           <table>
@@ -64,7 +66,9 @@ export default function Reports() {
             <tbody>
               {state.activities.length === 0 ? (
                 <tr>
-                  <td colSpan="8" style={{ textAlign: 'center' }}>No activity records saved yet.</td>
+                  <td colSpan="8">
+                    <div className="empty-state">No activity records saved yet.</div>
+                  </td>
                 </tr>
               ) : (
                 state.activities.map((activity) => (
@@ -74,15 +78,16 @@ export default function Reports() {
                     <td>{activity.label}</td>
                     <td>{activity.distance.toFixed(1)} km</td>
                     <td>{activity.duration} min</td>
-                    <td>{activity.effort}</td>
-                    <td>{activity.calories}</td>
+                    <td><span className="status-badge">{activity.effort}</span></td>
+                    <td><strong>{activity.calories}</strong></td>
                     <td>
                       <button
-                        className="text-btn"
-                        style={{ color: 'var(--danger)', padding: 0 }}
+                        className="danger-action"
                         onClick={() => handleDelete(activity.id)}
+                        type="button"
                       >
-                        Delete
+                        <Trash2 size={16} />
+                        <span>Delete</span>
                       </button>
                     </td>
                   </tr>

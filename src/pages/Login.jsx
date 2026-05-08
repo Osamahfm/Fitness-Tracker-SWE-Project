@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Activity, ArrowRight, LockKeyhole, Mail, UserRound } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
 
 export default function Login() {
@@ -42,9 +43,19 @@ export default function Login() {
 
   return (
     <div className="auth-overlay">
+      <div className="auth-brand-panel">
+        <div className="brand-mark"><Activity size={26} /></div>
+        <p className="eyebrow">FitFlow</p>
+        <h1>Fitness tracking that feels clear, fast, and focused.</h1>
+        <div className="auth-stats">
+          <span>Calories</span>
+          <span>Workouts</span>
+          <span>Goals</span>
+        </div>
+      </div>
+
       <div className="auth-card">
         <div className="auth-header">
-          <div className="brand-mark">FT</div>
           <h2>{isRegister ? "Create Account" : "Welcome Back"}</h2>
           <p>{isRegister ? "Create validated access for the web fitness tracker" : "Log in to access your saved fitness records"}</p>
         </div>
@@ -52,20 +63,21 @@ export default function Login() {
         <form className="auth-form" onSubmit={handleSubmit}>
           {isRegister && (
             <label>
-              Full Name
+              <span><UserRound size={18} /> Full Name</span>
               <input type="text" name="name" placeholder="Enter your name" required />
             </label>
           )}
           <label>
-            Email
+            <span><Mail size={18} /> Email</span>
             <input type="email" name="email" placeholder="user@example.com" required />
           </label>
           <label>
-            Password
+            <span><LockKeyhole size={18} /> Password</span>
             <input type="password" name="password" placeholder="Password" required />
           </label>
           <button type="submit" className={`primary-btn ${loading ? 'btn-loading' : ''}`}>
-            {isRegister ? "Sign Up" : "Log In"}
+            <span>{isRegister ? "Sign Up" : "Log In"}</span>
+            <ArrowRight size={18} />
           </button>
         </form>
 

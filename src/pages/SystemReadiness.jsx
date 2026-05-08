@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Activity, ClipboardCheck, HeartPulse, RefreshCw, ShieldCheck } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
 
 export default function SystemReadiness() {
@@ -75,25 +76,35 @@ export default function SystemReadiness() {
     <section className="workspace">
       <div className="dashboard-grid">
         <article className="metric-card">
-          <span>API Health</span>
+          <span><HeartPulse size={18} /> API Health</span>
           <strong>{health?.status || "Offline"}</strong>
           <p>Backend monitoring endpoint for deployment stabilization.</p>
         </article>
         <article className="metric-card">
-          <span>Uptime Target</span>
+          <span><Activity size={18} /> Uptime Target</span>
           <strong>{health?.uptimeTarget || 95}%</strong>
           <p>Project acceptance target from the charter and scope baseline.</p>
         </article>
         <article className="metric-card">
-          <span>Tracking Target</span>
+          <span><ShieldCheck size={18} /> Tracking Target</span>
           <strong>{health?.trackingTarget || 95}%</strong>
           <p>Daily user physical activity tracking target from the requirements.</p>
         </article>
-        <article className="metric-card">
-          <span>UAT Coverage</span>
+        <article className="metric-card accent-card">
+          <span><ClipboardCheck size={18} /> UAT Coverage</span>
           <strong>{passed}/{checks.length}</strong>
           <p>Acceptance checks backed by current system data.</p>
         </article>
+      </div>
+
+      <div className="progress-panel">
+        <div>
+          <p className="eyebrow">Release Confidence</p>
+          <strong>{Math.round((passed / checks.length) * 100)}%</strong>
+        </div>
+        <div className="progress-track" aria-label="System readiness progress">
+          <span style={{ '--width': `${(passed / checks.length) * 100}%` }}></span>
+        </div>
       </div>
 
       <section className="workspace two-column">
@@ -101,6 +112,7 @@ export default function SystemReadiness() {
           <div className="panel-heading">
             <p className="eyebrow">Deployment, UAT & Monitoring</p>
             <h3>System Readiness Checklist</h3>
+            <p className="panel-copy">Operational checks that show whether the tracker is ready for daily use.</p>
           </div>
           <div className="readiness-list">
             {checks.map((check) => (
@@ -113,13 +125,14 @@ export default function SystemReadiness() {
               </div>
             ))}
           </div>
-          <button type="button" className="secondary-btn" onClick={refreshHealth}>Refresh Monitoring</button>
+          <button type="button" className="secondary-btn" onClick={refreshHealth}><RefreshCw size={18} /> Refresh Monitoring</button>
         </div>
 
         <div className="panel">
           <div className="panel-heading">
             <p className="eyebrow">User Acceptance Testing</p>
             <h3>Approval Sign-Off</h3>
+            <p className="panel-copy">Capture the latest approval note and keep it with the readiness record.</p>
           </div>
           <form className="form-grid single" onSubmit={handleSubmit}>
             <label>
