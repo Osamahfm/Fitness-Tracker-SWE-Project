@@ -92,6 +92,18 @@
       "date": "4/28/2026",
       "time": "02:14 AM",
       "createdAt": "2026-04-27T23:14:06.028Z"
+    },
+    {
+      "id": "87ebe6fbee484ef33b6d9b25",
+      "userId": "c813efc97fae308461256a58",
+      "label": "Private Training",
+      "distance": 10,
+      "duration": 30,
+      "effort": "Moderate",
+      "calories": 292,
+      "date": "5/8/2026",
+      "time": "06:36 PM",
+      "createdAt": "2026-05-08T15:36:56.574Z"
     }
   ],
   "alarms": [
