@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlarmClock, BellRing, Clock, MessageSquareText } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
-import { getRoleProfile, hasPermission } from '../utils/userRoles';
+import { getRoleHomePath, getRoleProfile, hasPermission } from '../utils/userRoles';
 
 const alarmsPageByRole = {
   customer: {
@@ -41,7 +41,7 @@ export default function Alarms() {
   useEffect(() => {
     if (!hasPermission(state.profile.role, 'canSetReminders')) {
       showToast('You do not have permission to access reminders.', true);
-      navigate('/');
+      navigate(getRoleHomePath(state.profile.role), { replace: true });
     }
   }, [state.profile.role, navigate, showToast]);
   

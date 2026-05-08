@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Activity, ArrowRight, LockKeyhole, Mail, Scale, Target, UserRound } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
+import { getRoleHomePath } from '../utils/userRoles';
 
 export default function Login() {
   const { state, registerUser, loginUser, showToast } = useAppContext();
@@ -11,7 +12,7 @@ export default function Login() {
 
   useEffect(() => {
     if (state.profile.email && state.profile.name) {
-      navigate('/');
+      navigate(getRoleHomePath(state.profile.role), { replace: true });
     }
   }, [state.profile, navigate]);
 

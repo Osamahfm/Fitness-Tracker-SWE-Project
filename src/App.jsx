@@ -10,6 +10,14 @@ import MealsAndGoals from './pages/MealsAndGoals';
 import Alarms from './pages/Alarms';
 import Login from './pages/Login';
 import SystemReadiness from './pages/SystemReadiness';
+import { getRoleHomePath } from './utils/userRoles';
+import { useAppContext } from './context/useAppContext';
+
+function RootRedirect() {
+  const { state } = useAppContext();
+  if (!state.profile.email) return <Navigate to="/login" replace />;
+  return <Navigate to={getRoleHomePath(state.profile.role)} replace />;
+}
 
 function App() {
   return (
@@ -17,65 +25,58 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route 
-            path="/" 
+          <Route path="/" element={<RootRedirect />} />
+
+          {/* CUSTOMER ROUTES */}
+          <Route
+            path="/customer"
             element={
               <ProtectedRoute>
                 <Layout />
               </ProtectedRoute>
             }
           >
-            <Route index element={<Dashboard />} />
-            <Route 
-              path="profile" 
-              element={
-                <ProtectedRoute requiredPath="/profile">
-                  <Profile />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="activity" 
-              element={
-                <ProtectedRoute requiredPath="/activity">
-                  <ActivityInput />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="reports" 
-              element={
-                <ProtectedRoute requiredPath="/reports">
-                  <Reports />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="recommendations" 
-              element={
-                <ProtectedRoute requiredPath="/recommendations">
-                  <MealsAndGoals />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="alarms" 
-              element={
-                <ProtectedRoute requiredPath="/alarms">
-                  <Alarms />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="readiness" 
-              element={
-                <ProtectedRoute requiredPath="/readiness">
-                  <SystemReadiness />
-                </ProtectedRoute>
-              } 
-            />
+            <Route path="dashboard" element={<ProtectedRoute requiredPath="/customer/dashboard"><Dashboard /></ProtectedRoute>} />
+            <Route path="workout" element={<ProtectedRoute requiredPath="/customer/workout"><ActivityInput /></ProtectedRoute>} />
+            <Route path="reports" element={<ProtectedRoute requiredPath="/customer/reports"><Reports /></ProtectedRoute>} />
+            <Route path="nutrition" element={<ProtectedRoute requiredPath="/customer/nutrition"><MealsAndGoals /></ProtectedRoute>} />
+            <Route path="alarms" element={<ProtectedRoute requiredPath="/customer/alarms"><Alarms /></ProtectedRoute>} />
+            <Route path="profile" element={<ProtectedRoute requiredPath="/customer/profile"><Profile /></ProtectedRoute>} />
           </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
+
+          {/* TRAINER ROUTES */}
+          <Route
+            path="/trainer"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="hub" element={<ProtectedRoute requiredPath="/trainer/hub"><Dashboard /></ProtectedRoute>} />
+            <Route path="session-builder" element={<ProtectedRoute requiredPath="/trainer/session-builder"><ActivityInput /></ProtectedRoute>} />
+            <Route path="client-analytics" element={<ProtectedRoute requiredPath="/trainer/client-analytics"><Reports /></ProtectedRoute>} />
+            <Route path="meal-plans" element={<ProtectedRoute requiredPath="/trainer/meal-plans"><MealsAndGoals /></ProtectedRoute>} />
+            <Route path="profile" element={<ProtectedRoute requiredPath="/trainer/profile"><Profile /></ProtectedRoute>} />
+          </Route>
+
+          {/* ADMIN ROUTES */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="system-hub" element={<ProtectedRoute requiredPath="/admin/system-hub"><Dashboard /></ProtectedRoute>} />
+            <Route path="activity-qa" element={<ProtectedRoute requiredPath="/admin/activity-qa"><ActivityInput /></ProtectedRoute>} />
+            <Route path="data-reports" element={<ProtectedRoute requiredPath="/admin/data-reports"><Reports /></ProtectedRoute>} />
+            <Route path="readiness" element={<ProtectedRoute requiredPath="/admin/readiness"><SystemReadiness /></ProtectedRoute>} />
+            <Route path="profile" element={<ProtectedRoute requiredPath="/admin/profile"><Profile /></ProtectedRoute>} />
+          </Route>
+
+          <Route path="*" element={<RootRedirect />} />
         </Routes>
       </BrowserRouter>
     </AppProvider>

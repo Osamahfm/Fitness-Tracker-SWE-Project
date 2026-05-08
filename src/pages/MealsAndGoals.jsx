@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Flame, Footprints, Salad, Target } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
 import { getUserActivityMetrics } from '../utils/userMetrics';
-import { getRoleProfile, hasFeature } from '../utils/userRoles';
+import { getRoleHomePath, getRoleProfile } from '../utils/userRoles';
 
 const mealsHighCal = ["Grilled Chicken Breast with Quinoa", "Salmon with Sweet Potato Mash", "Large Tuna Salad with Olive Oil"];
 const mealsLowCal = ["Greek Yogurt with Mixed Berries", "Avocado Toast with a Poached Egg", "Protein Shake with Almond Milk"];
@@ -40,9 +40,9 @@ export default function MealsAndGoals() {
   useEffect(() => {
     if (role === 'admin') {
       showToast('You do not have permission to access nutrition recommendations.', true);
-      navigate('/');
+      navigate(getRoleHomePath(state.profile.role), { replace: true });
     }
-  }, [role, navigate, showToast]);
+  }, [role, navigate, showToast, state.profile.role]);
   
   const pageCopy = mealsPageByRole[role] || mealsPageByRole.customer;
 

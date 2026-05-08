@@ -7,6 +7,11 @@ const PORT = Number(process.env.PORT || 4174);
 const startedAt = Date.now();
 const validRoles = new Set(['customer', 'trainer', 'admin']);
 
+function requireRole(user, allowedRoles) {
+  const role = normalizeRole(user?.role);
+  return allowedRoles.includes(role);
+}
+
 function json(res, status, data) {
   res.writeHead(status, {
     'Content-Type': 'application/json',
@@ -193,6 +198,11 @@ async function route(req, res) {
   if (req.method === 'POST' && url.pathname === '/api/activities') {
     const user = await requireUser(req, res);
     if (!user) return;
+    // RBAC: Only customers can create "real" workout logs.
+    // Trainers/admins have separate UI flows; keeping this strict prevents role overlap.
+    if (!requireRole(user, ['customer'])) {
+      return json(res, 403, { error: "You do not have permission to create activities." });
+    }
     const payload = await body(req);
     const input = { ...payload, weight: user.weight };
     const validation = validateCalorieInput(input);
@@ -222,6 +232,10 @@ async function route(req, res) {
   if (req.method === 'DELETE' && url.pathname.startsWith('/api/activities/')) {
     const user = await requireUser(req, res);
     if (!user) return;
+    // RBAC: Only customers can delete their activities.
+    if (!requireRole(user, ['customer'])) {
+      return json(res, 403, { error: "You do not have permission to delete activities." });
+    }
     const id = url.pathname.split('/').pop();
     await updateDb((db) => {
       db.activities = db.activities.filter((activity) => !(activity.id === id && activity.userId === user.id));
@@ -232,6 +246,10 @@ async function route(req, res) {
   if (req.method === 'POST' && url.pathname === '/api/alarms') {
     const user = await requireUser(req, res);
     if (!user) return;
+    // RBAC: Only customers can set reminders.
+    if (!requireRole(user, ['customer'])) {
+      return json(res, 403, { error: "You do not have permission to set reminders." });
+    }
     const payload = await body(req);
     const alarm = await updateDb((db) => {
       db.alarms = db.alarms.filter((item) => item.userId !== user.id);
@@ -253,6 +271,10 @@ async function route(req, res) {
   if (req.method === 'POST' && url.pathname === '/api/uat-signoff') {
     const user = await requireUser(req, res);
     if (!user) return;
+    // RBAC: Only admins can sign off UAT/system readiness.
+    if (!requireRole(user, ['admin'])) {
+      return json(res, 403, { error: "You do not have permission to record UAT sign-off." });
+    }
     const payload = await body(req);
     const signoff = await updateDb((db) => {
       const record = {

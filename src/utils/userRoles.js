@@ -66,9 +66,16 @@ export const rolePermissions = {
       dataAudit: false
     },
     
-    // Allowed pages - CUSTOMER ONLY
-    allowedPages: ['/','/', '/activity', '/reports', '/recommendations', '/alarms', '/profile'],
-    blockedPages: ['/readiness', '/clients', '/admin', '/audit']
+    // Allowed pages - CUSTOMER ONLY (namespaced)
+    allowedPages: [
+      '/customer/dashboard',
+      '/customer/workout',
+      '/customer/reports',
+      '/customer/nutrition',
+      '/customer/alarms',
+      '/customer/profile'
+    ],
+    blockedPages: ['/trainer', '/admin']
   },
 
   trainer: {
@@ -108,9 +115,15 @@ export const rolePermissions = {
       dataAudit: false
     },
     
-    // Allowed pages - TRAINER ONLY
-    allowedPages: ['/', '/activity', '/reports', '/recommendations', '/alarms', '/profile'],
-    blockedPages: ['/readiness', '/audit', '/admin']
+    // Allowed pages - TRAINER ONLY (namespaced)
+    allowedPages: [
+      '/trainer/hub',
+      '/trainer/session-builder',
+      '/trainer/client-analytics',
+      '/trainer/meal-plans',
+      '/trainer/profile'
+    ],
+    blockedPages: ['/customer', '/admin']
   },
 
   admin: {
@@ -152,9 +165,15 @@ export const rolePermissions = {
       roleManagement: true
     },
     
-    // Allowed pages - ADMIN ONLY
-    allowedPages: ['/', '/activity', '/reports', '/readiness', '/profile'],
-    blockedPages: ['/alarms', '/recommendations', '/clients']
+    // Allowed pages - ADMIN ONLY (namespaced)
+    allowedPages: [
+      '/admin/system-hub',
+      '/admin/activity-qa',
+      '/admin/data-reports',
+      '/admin/readiness',
+      '/admin/profile'
+    ],
+    blockedPages: ['/customer', '/trainer']
   }
 };
 
@@ -169,16 +188,8 @@ export function canAccessPage(role, page) {
   const normalized = normalizeRole(role);
   const permissions = rolePermissions[normalized];
   if (!permissions) return false;
-  
-  // Check if page is in allowed list
-  if (!permissions.allowedPages.includes(page)) {
-    // Also check for root path alias
-    if (page !== '/' && permissions.allowedPages.includes('/')) {
-      return true;
-    }
-    return false;
-  }
-  return true;
+
+  return permissions.allowedPages.includes(page);
 }
 
 // Helper function to check if a role has a specific feature
@@ -191,14 +202,14 @@ const roleInterfaces = {
   customer: {
     workspaceTitle: 'Customer Activity Workspace',
     topbarEyebrow: 'Fitness Tracker',
-    navRoutes: ['/', '/activity', '/reports', '/recommendations', '/alarms', '/profile'],
+    navRoutes: ['/customer/dashboard', '/customer/workout', '/customer/reports', '/customer/nutrition', '/customer/alarms', '/customer/profile'],
     navLabels: {
-      '/': 'Dashboard',
-      '/activity': 'Workout',
-      '/reports': 'Analytics',
-      '/recommendations': 'Nutrition',
-      '/alarms': 'Alarms',
-      '/profile': 'Profile'
+      '/customer/dashboard': 'Dashboard',
+      '/customer/workout': 'Workout',
+      '/customer/reports': 'Analytics',
+      '/customer/nutrition': 'Nutrition',
+      '/customer/alarms': 'Alarms',
+      '/customer/profile': 'Profile'
     },
     insights: {
       activeDays: 'Active Days',
@@ -237,21 +248,21 @@ const roleInterfaces = {
       detail: (insights) => `Favorite activity: ${insights.favoriteActivity} - Avg burn: ${insights.averageDailyCalories} cal/day`
     },
     actions: [
-      { label: 'Log Workout', description: 'Record distance, duration, effort, and calories.', to: '/activity' },
-      { label: 'Review Nutrition', description: 'See meal and goal recommendations.', to: '/recommendations' },
-      { label: 'Set Reminder', description: 'Schedule your next activity window.', to: '/alarms' }
+      { label: 'Log Workout', description: 'Record distance, duration, effort, and calories.', to: '/customer/workout' },
+      { label: 'Review Nutrition', description: 'See meal and goal recommendations.', to: '/customer/nutrition' },
+      { label: 'Set Reminder', description: 'Schedule your next activity window.', to: '/customer/alarms' }
     ]
   },
   trainer: {
     workspaceTitle: 'Trainer Coaching Workspace',
     topbarEyebrow: 'Trainer Portal - Client Coaching',
-    navRoutes: ['/', '/activity', '/reports', '/recommendations', '/profile'],
+    navRoutes: ['/trainer/hub', '/trainer/session-builder', '/trainer/client-analytics', '/trainer/meal-plans', '/trainer/profile'],
     navLabels: {
-      '/': 'Coaching Hub',
-      '/activity': 'Session Builder',
-      '/reports': 'Client Analytics',
-      '/recommendations': 'Meal Plans',
-      '/profile': 'Trainer Profile'
+      '/trainer/hub': 'Coaching Hub',
+      '/trainer/session-builder': 'Session Builder',
+      '/trainer/client-analytics': 'Client Analytics',
+      '/trainer/meal-plans': 'Meal Plans',
+      '/trainer/profile': 'Trainer Profile'
     },
     insights: {
       activeDays: 'Session Days',
@@ -290,21 +301,21 @@ const roleInterfaces = {
       detail: (insights) => `Preferred activity: ${insights.favoriteActivity} - Avg client burn: ${insights.averageDailyCalories} cal/day`
     },
     actions: [
-      { label: 'Build Session', description: 'Plan and save the next workout record.', to: '/activity' },
-      { label: 'Review Client Data', description: 'Filter, export, and audit progress.', to: '/reports' },
-      { label: 'Plan Meal Guidance', description: 'Match meals to activity output.', to: '/recommendations' }
+      { label: 'Build Session', description: 'Plan and save the next workout record.', to: '/trainer/session-builder' },
+      { label: 'Review Client Data', description: 'Filter, export, and audit progress.', to: '/trainer/client-analytics' },
+      { label: 'Plan Meal Guidance', description: 'Match meals to activity output.', to: '/trainer/meal-plans' }
     ]
   },
   admin: {
     workspaceTitle: 'Admin System Workspace',
     topbarEyebrow: 'Backend Developer & Software Engineer',
-    navRoutes: ['/', '/activity', '/reports', '/readiness', '/profile'],
+    navRoutes: ['/admin/system-hub', '/admin/activity-qa', '/admin/data-reports', '/admin/readiness', '/admin/profile'],
     navLabels: {
-      '/': 'System Hub',
-      '/activity': 'Activity QA',
-      '/reports': 'Data Reports',
-      '/readiness': 'Readiness',
-      '/profile': 'Admin Profile'
+      '/admin/system-hub': 'System Hub',
+      '/admin/activity-qa': 'Activity QA',
+      '/admin/data-reports': 'Data Reports',
+      '/admin/readiness': 'Readiness',
+      '/admin/profile': 'Admin Profile'
     },
     insights: {
       activeDays: 'Data Days',
@@ -343,15 +354,22 @@ const roleInterfaces = {
       detail: (insights) => `Dominant record type: ${insights.favoriteActivity} - Avg computed burn: ${insights.averageDailyCalories} cal/day`
     },
     actions: [
-      { label: 'Check Readiness', description: 'Review API health, UAT, and monitoring.', to: '/readiness' },
-      { label: 'Audit Reports', description: 'Inspect saved records and CSV output.', to: '/reports' },
-      { label: 'Test Activity Engine', description: 'Validate calorie calculation inputs.', to: '/activity' }
+      { label: 'Check Readiness', description: 'Review API health, UAT, and monitoring.', to: '/admin/readiness' },
+      { label: 'Audit Reports', description: 'Inspect saved records and CSV output.', to: '/admin/data-reports' },
+      { label: 'Test Activity Engine', description: 'Validate calorie calculation inputs.', to: '/admin/activity-qa' }
     ]
   }
 };
 
 export function getRoleInterface(role) {
   return roleInterfaces[normalizeRole(role)] || roleInterfaces[defaultRole];
+}
+
+export function getRoleHomePath(role) {
+  const normalized = normalizeRole(role);
+  if (normalized === 'trainer') return '/trainer/hub';
+  if (normalized === 'admin') return '/admin/system-hub';
+  return '/customer/dashboard';
 }
 
 export function getRoleDashboardMessage(role, name) {

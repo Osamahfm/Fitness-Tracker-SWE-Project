@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Activity, ClipboardCheck, HeartPulse, RefreshCw, ShieldCheck } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
-import { hasPermission } from '../utils/userRoles';
+import { getRoleHomePath, hasPermission } from '../utils/userRoles';
 
 export default function SystemReadiness() {
   const { state, addUatSignoff, loadHealth, showToast } = useAppContext();
@@ -12,7 +12,7 @@ export default function SystemReadiness() {
   useEffect(() => {
     if (!hasPermission(state.profile.role, 'canViewSystemHealth')) {
       showToast('You do not have permission to access system readiness.', true);
-      navigate('/');
+      navigate(getRoleHomePath(state.profile.role), { replace: true });
     }
   }, [state.profile.role, navigate, showToast]);
   

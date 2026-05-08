@@ -16,13 +16,24 @@ import { useAppContext } from '../context/useAppContext';
 import { getRoleInterface, getRoleProfile } from '../utils/userRoles';
 
 const navItems = [
-  { to: '/', label: 'Dashboard', icon: Home, end: true },
-  { to: '/activity', label: 'Workout', icon: Dumbbell },
-  { to: '/reports', label: 'Analytics', icon: BarChart3 },
-  { to: '/recommendations', label: 'Nutrition', icon: Salad },
-  { to: '/alarms', label: 'Alarms', icon: AlarmClock },
-  { to: '/profile', label: 'Profile', icon: UserRound },
-  { to: '/readiness', label: 'Readiness', icon: ClipboardCheck }
+  { to: '/customer/dashboard', label: 'Dashboard', icon: Home, end: true },
+  { to: '/customer/workout', label: 'Workout', icon: Dumbbell },
+  { to: '/customer/reports', label: 'Analytics', icon: BarChart3 },
+  { to: '/customer/nutrition', label: 'Nutrition', icon: Salad },
+  { to: '/customer/alarms', label: 'Alarms', icon: AlarmClock },
+  { to: '/customer/profile', label: 'Profile', icon: UserRound },
+
+  { to: '/trainer/hub', label: 'Coaching Hub', icon: Home, end: true },
+  { to: '/trainer/session-builder', label: 'Session Builder', icon: Dumbbell },
+  { to: '/trainer/client-analytics', label: 'Client Analytics', icon: BarChart3 },
+  { to: '/trainer/meal-plans', label: 'Meal Plans', icon: Salad },
+  { to: '/trainer/profile', label: 'Trainer Profile', icon: UserRound },
+
+  { to: '/admin/system-hub', label: 'System Hub', icon: Home, end: true },
+  { to: '/admin/activity-qa', label: 'Activity QA', icon: Dumbbell },
+  { to: '/admin/data-reports', label: 'Data Reports', icon: BarChart3 },
+  { to: '/admin/readiness', label: 'Readiness', icon: ClipboardCheck },
+  { to: '/admin/profile', label: 'Admin Profile', icon: UserRound }
 ];
 
 export default function Layout() {

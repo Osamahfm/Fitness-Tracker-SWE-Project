@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAppContext } from '../context/useAppContext';
-import { canAccessPage } from '../utils/userRoles';
+import { canAccessPage, getRoleHomePath } from '../utils/userRoles';
 
 export default function ProtectedRoute({ children, requiredPath }) {
   const { state } = useAppContext();
@@ -16,8 +16,7 @@ export default function ProtectedRoute({ children, requiredPath }) {
   const pathToCheck = requiredPath || currentPath;
   
   if (!canAccessPage(state.profile.role, pathToCheck)) {
-    // Redirect to home dashboard for their role
-    return <Navigate to="/" replace />;
+    return <Navigate to={getRoleHomePath(state.profile.role)} replace />;
   }
 
   return children;

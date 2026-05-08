@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Calculator, CheckCircle2, Dumbbell, Gauge, Route, Timer } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
 import { activityFactors, effortLabels } from '../utils/fitnessMath';
-import { getRoleProfile, hasPermission } from '../utils/userRoles';
+import { getRoleHomePath, getRoleProfile, hasPermission } from '../utils/userRoles';
 
 const defaultActivityForm = {
   type: 'walk',
@@ -61,7 +61,7 @@ export default function ActivityInput() {
   useEffect(() => {
     if (!hasPermission(state.profile.role, 'canLogActivities') && role !== 'admin') {
       showToast('You do not have permission to access this page.', true);
-      navigate('/');
+      navigate(getRoleHomePath(state.profile.role), { replace: true });
     }
   }, [state.profile.role, role, navigate, showToast]);
 

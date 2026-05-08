@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useAppContext } from '../context/useAppContext';
 import { CalendarDays, Download, Flame, Footprints, Search, Trash2, Timer } from 'lucide-react';
 import { getUserActivityMetrics } from '../utils/userMetrics';
-import { getRoleProfile, hasFeature } from '../utils/userRoles';
+import { getRoleProfile } from '../utils/userRoles';
 
 const reportsPageByRole = {
   customer: {
