@@ -168,7 +168,7 @@ async function route(req, res) {
       const found = db.users.find((item) => item.id === user.id);
       found.name = String(payload.name || found.name).trim();
       found.email = String(payload.email || found.email).trim().toLowerCase();
-      found.role = normalizeRole(payload.role || found.role);
+      // Role cannot be updated via profile endpoint
       found.goal = payload.goal || found.goal;
       found.weight = Number(payload.weight || found.weight);
       found.validated = true;

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useAppContext } from '../context/useAppContext';
 import { CalendarDays, Download, Flame, Footprints, Search, Trash2, Timer } from 'lucide-react';
 import { getUserActivityMetrics } from '../utils/userMetrics';
-import { getRoleProfile } from '../utils/userRoles';
+import { getRoleProfile, hasFeature } from '../utils/userRoles';
 
 const reportsPageByRole = {
   customer: {
@@ -12,7 +12,10 @@ const reportsPageByRole = {
     caloriesLabel: 'Total Calories',
     eyebrow: 'Daily Reports',
     title: 'Saved Activity Records',
-    copy: 'Review, audit, and clean up the activity history used by your dashboard.'
+    copy: 'Review, audit, and clean up the activity history used by your dashboard.',
+    canDelete: true,
+    canExport: false,
+    canAudit: false
   },
   trainer: {
     dateLabel: 'Review Date',
@@ -21,7 +24,10 @@ const reportsPageByRole = {
     caloriesLabel: 'Client Calories',
     eyebrow: 'Client Analytics',
     title: 'Coaching Activity Records',
-    copy: 'Filter session history, review client workload, and export coaching records.'
+    copy: 'Filter session history, review client workload, and export coaching records.',
+    canDelete: false,
+    canExport: true,
+    canAudit: false
   },
   admin: {
     dateLabel: 'Audit Date',
@@ -30,7 +36,10 @@ const reportsPageByRole = {
     caloriesLabel: 'Calculated Calories',
     eyebrow: 'Data Reports',
     title: 'Activity Data Audit',
-    copy: 'Inspect saved records, validate calculations, and export data for system checks.'
+    copy: 'Inspect saved records, validate calculations, and export data for system checks.',
+    canDelete: false,
+    canExport: true,
+    canAudit: true
   }
 };
 
@@ -173,15 +182,17 @@ export default function Reports() {
               ))}
             </select>
           </label>
-          <button
-            className="secondary-btn toolbar-action"
-            disabled={filteredActivities.length === 0}
-            onClick={exportCsv}
-            type="button"
-          >
-            <Download size={17} />
-            Export CSV
-          </button>
+          {pageCopy.canExport && (
+            <button
+              className="secondary-btn toolbar-action"
+              disabled={filteredActivities.length === 0}
+              onClick={exportCsv}
+              type="button"
+            >
+              <Download size={17} />
+              Export CSV
+            </button>
+          )}
         </div>
         <div className="report-summary" aria-label="Filtered report summary">
           <span>{filteredActivities.length} record(s)</span>
@@ -227,14 +238,16 @@ export default function Reports() {
                     <td><span className="status-badge">{activity.effort}</span></td>
                     <td><strong>{activity.calories}</strong></td>
                     <td>
-                      <button
-                        className="danger-action"
-                        onClick={() => handleDelete(activity.id)}
-                        type="button"
-                      >
-                        <Trash2 size={16} />
-                        <span>Delete</span>
-                      </button>
+                      {pageCopy.canDelete && (
+                        <button
+                          className="danger-action"
+                          onClick={() => handleDelete(activity.id)}
+                          type="button"
+                        >
+                          <Trash2 size={16} />
+                          <span>Delete</span>
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))

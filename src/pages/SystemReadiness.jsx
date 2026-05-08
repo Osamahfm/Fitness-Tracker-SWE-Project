@@ -1,9 +1,21 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Activity, ClipboardCheck, HeartPulse, RefreshCw, ShieldCheck } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
+import { hasPermission } from '../utils/userRoles';
 
 export default function SystemReadiness() {
   const { state, addUatSignoff, loadHealth, showToast } = useAppContext();
+  const navigate = useNavigate();
+  
+  // Only admins can access system readiness
+  useEffect(() => {
+    if (!hasPermission(state.profile.role, 'canViewSystemHealth')) {
+      showToast('You do not have permission to access system readiness.', true);
+      navigate('/');
+    }
+  }, [state.profile.role, navigate, showToast]);
+  
   const [signoffForm, setSignoffForm] = useState({
     approver: state.profile.name,
     role: "IT Department",

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AlarmClock, BellRing, Clock, MessageSquareText } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
-import { getRoleProfile } from '../utils/userRoles';
+import { getRoleProfile, hasPermission } from '../utils/userRoles';
 
 const alarmsPageByRole = {
   customer: {
@@ -12,24 +13,6 @@ const alarmsPageByRole = {
     monitorTitle: 'Active reminder',
     monitorCopy: 'Current reminder state for the daily activity flow.',
     submitLabel: 'Set Reminder'
-  },
-  trainer: {
-    eyebrow: 'Trainer Follow-Up',
-    title: 'Client reminder',
-    copy: 'Set a follow-up reminder for coaching check-ins or planned sessions.',
-    monitorEyebrow: 'Coaching Follow-Up State',
-    monitorTitle: 'Active follow-up',
-    monitorCopy: 'Current reminder state for the trainer workflow.',
-    submitLabel: 'Set Follow-Up'
-  },
-  admin: {
-    eyebrow: 'Operational Reminder',
-    title: 'System task reminder',
-    copy: 'Set a reminder for validation, monitoring, or release-readiness checks.',
-    monitorEyebrow: 'Operational Monitoring',
-    monitorTitle: 'Active task reminder',
-    monitorCopy: 'Current reminder state for administrative follow-up.',
-    submitLabel: 'Set Task Reminder'
   }
 };
 
@@ -51,7 +34,17 @@ function getSavedAlarmDraft(alarm) {
 
 export default function Alarms() {
   const { state, setAlarm, showToast } = useAppContext();
+  const navigate = useNavigate();
   const role = getRoleProfile(state.profile.role).value;
+  
+  // Only customers can access alarms/reminders
+  useEffect(() => {
+    if (!hasPermission(state.profile.role, 'canSetReminders')) {
+      showToast('You do not have permission to access reminders.', true);
+      navigate('/');
+    }
+  }, [state.profile.role, navigate, showToast]);
+  
   const pageCopy = alarmsPageByRole[role] || alarmsPageByRole.customer;
   
   const [formData, setFormData] = useState(() => getSavedAlarmDraft(state.alarm));
@@ -98,9 +91,9 @@ export default function Alarms() {
       </div>
       <div className="panel">
         <div className="panel-heading">
-          <p className="eyebrow">{pageCopy.monitorEyebrow}</p>
-          <h3>{pageCopy.monitorTitle}</h3>
-          <p className="panel-copy">{pageCopy.monitorCopy}</p>
+          <p className="eyebrow">Monitoring & Stabilization</p>
+          <h3>Active reminder</h3>
+          <p className="panel-copy">Current reminder state for the daily activity flow.</p>
         </div>
         <div className={`reminder-card ${state.alarm ? (state.alarm.triggered ? 'warning' : 'ready') : ''}`}>
           <BellRing size={30} />

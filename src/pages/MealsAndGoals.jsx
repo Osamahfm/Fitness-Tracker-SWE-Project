@@ -1,7 +1,9 @@
-import { useAppContext } from '../context/useAppContext';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Flame, Footprints, Salad, Target } from 'lucide-react';
+import { useAppContext } from '../context/useAppContext';
 import { getUserActivityMetrics } from '../utils/userMetrics';
-import { getRoleProfile } from '../utils/userRoles';
+import { getRoleProfile, hasFeature } from '../utils/userRoles';
 
 const mealsHighCal = ["Grilled Chicken Breast with Quinoa", "Salmon with Sweet Potato Mash", "Large Tuna Salad with Olive Oil"];
 const mealsLowCal = ["Greek Yogurt with Mixed Berries", "Avocado Toast with a Poached Egg", "Protein Shake with Almond Milk"];
@@ -26,22 +28,22 @@ const mealsPageByRole = {
     goalEyebrow: 'Trainer Goal Planning',
     goalTitle: 'Client goal direction',
     goalCopy: 'A practical coaching next step, tuned to the tracked workload.'
-  },
-  admin: {
-    energyLabel: 'Calculated Output',
-    movementLabel: 'Stored Movement',
-    mealEyebrow: 'Recommendation QA',
-    mealTitle: 'Meal rule output',
-    mealCopy: 'A data-driven recommendation generated from the current activity record set.',
-    goalEyebrow: 'Goal Rule QA',
-    goalTitle: 'Goal rule output',
-    goalCopy: 'A check of profile and activity inputs used by the recommendation logic.'
   }
 };
 
 export default function MealsAndGoals() {
-  const { state } = useAppContext();
+  const { state, showToast } = useAppContext();
+  const navigate = useNavigate();
   const role = getRoleProfile(state.profile.role).value;
+  
+  // Only customers and trainers can access recommendations
+  useEffect(() => {
+    if (role === 'admin') {
+      showToast('You do not have permission to access nutrition recommendations.', true);
+      navigate('/');
+    }
+  }, [role, navigate, showToast]);
+  
   const pageCopy = mealsPageByRole[role] || mealsPageByRole.customer;
 
   const metrics = getUserActivityMetrics(state.activities);

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Calculator, CheckCircle2, Dumbbell, Gauge, Route, Timer } from 'lucide-react';
 import { useAppContext } from '../context/useAppContext';
 import { activityFactors, effortLabels } from '../utils/fitnessMath';
-import { getRoleProfile } from '../utils/userRoles';
+import { getRoleProfile, hasPermission } from '../utils/userRoles';
 
 const defaultActivityForm = {
   type: 'walk',
@@ -52,8 +53,17 @@ function getSavedActivityDraft() {
 
 export default function ActivityInput() {
   const { state, estimateCalories, addActivity, showToast } = useAppContext();
+  const navigate = useNavigate();
   const role = getRoleProfile(state.profile.role).value;
   const pageCopy = activityPageByRole[role] || activityPageByRole.customer;
+
+  // Check permission - only customers and trainers can log activities
+  useEffect(() => {
+    if (!hasPermission(state.profile.role, 'canLogActivities') && role !== 'admin') {
+      showToast('You do not have permission to access this page.', true);
+      navigate('/');
+    }
+  }, [state.profile.role, role, navigate, showToast]);
 
   const [formData, setFormData] = useState(getSavedActivityDraft);
   const [calculation, setCalculation] = useState({

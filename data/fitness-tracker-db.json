@@ -66,6 +66,66 @@
       "passwordHash": "2e34b41169f1917f99a0fb2522f809992415bc4be2aea3ac396cce88c2d1b8bc1c31a931f8ec8f8a30d9f54d2322ddf48c0864fd0d888c9ff24a7332167b0428",
       "validated": true,
       "createdAt": "2026-05-08T20:38:35.186Z"
+    },
+    {
+      "id": "5759c646cc313e8d0b604ac7",
+      "name": "Admin One",
+      "email": "admin1@fitflow.com",
+      "role": "admin",
+      "goal": "Body Recompose",
+      "weight": 75,
+      "passwordSalt": "ae81122a5c7a5fea640b3d4f58d1841c",
+      "passwordHash": "bc1f0c30c8b837f6759b6f49c045098a254e97bda4ad8a07538b7fdaa3e8d9ece97d3c9a40a1918bc976e089dae56c5fcc3413e5602dc751d59ce1d07fbffff2",
+      "validated": true,
+      "createdAt": "2026-05-08T21:13:05.796Z"
+    },
+    {
+      "id": "21456d8424c1deef5e4783a3",
+      "name": "Admin Two",
+      "email": "admin2@fitflow.com",
+      "role": "admin",
+      "goal": "Body Recompose",
+      "weight": 75,
+      "passwordSalt": "8ce6518465a3328544da18d9e1ef5627",
+      "passwordHash": "effb917f7d56b1fa5e3bae4b8f035d79f1cd05c3f1a694bee62b0dec17ef6da1c55e1e4ebafd4fbbb2df2d2910bc20ab27bddbb33811b7600de35c16b3599385",
+      "validated": true,
+      "createdAt": "2026-05-08T21:13:05.882Z"
+    },
+    {
+      "id": "a294b7c2cc62fb823207f958",
+      "name": "Trainer One",
+      "email": "trainer1@fitflow.com",
+      "role": "trainer",
+      "goal": "Body Recompose",
+      "weight": 75,
+      "passwordSalt": "7dbef0714a22fb72b919a812ce33d8b6",
+      "passwordHash": "1fdc22b67433fae6320d0d82b180e61da14141293f421d6e61b575f3aa5f05679fbdb071d8cdeac6918a6ac53dec0d9fa2a8567abd6a4387e5208faaa707cc99",
+      "validated": true,
+      "createdAt": "2026-05-08T21:13:05.962Z"
+    },
+    {
+      "id": "caf6a7e14afbd0fb03449ce0",
+      "name": "Trainer Two",
+      "email": "trainer2@fitflow.com",
+      "role": "trainer",
+      "goal": "Body Recompose",
+      "weight": 75,
+      "passwordSalt": "3b216f60e926b06d0455abfdf6c076ed",
+      "passwordHash": "e6b93bbcb707e962801a541726d7c90a1b3d44aba969e610cd63acd552698cb3bdfe13895584d7da24c51855df32a94769e6d6bc61be33a8463c5c5065a4d7d0",
+      "validated": true,
+      "createdAt": "2026-05-08T21:13:06.041Z"
+    },
+    {
+      "id": "98a09761c766110779553fc2",
+      "name": "Trainer Three",
+      "email": "trainer3@fitflow.com",
+      "role": "trainer",
+      "goal": "Body Recompose",
+      "weight": 75,
+      "passwordSalt": "b29f339bd13896ac0ccd7fe72cef7e6c",
+      "passwordHash": "f1c1f6ce9ffc2c93acdce3ff9e2599319aa012bb68bb82b25e36428ea254a9529064170e58b220881b5f391432991f933e5567df3a3b71e20adc499bfc0842b5",
+      "validated": true,
+      "createdAt": "2026-05-08T21:13:06.119Z"
     }
   ],
   "sessions": [
@@ -113,6 +173,11 @@
       "token": "bc1c1dcce4661adf42dedbeb9cfb514e8a4097e3a4f6b138",
       "userId": "8624945ea00e49bd174c96be",
       "createdAt": "2026-05-08T20:38:35.186Z"
+    },
+    {
+      "token": "48b6f3034cce4250cbe4a1bdd07da53c917282aa57bec4e3",
+      "userId": "f1e99e506f5b053a0f7f864c",
+      "createdAt": "2026-05-08T21:03:15.616Z"
     }
   ],
   "activities": [

@@ -4,17 +4,20 @@ export const roleOptions = [
   {
     value: 'customer',
     label: 'Customer',
-    description: 'Track workouts, meals, goals, reminders, and personal progress.'
+    description: 'Track workouts, meals, goals, reminders, and personal progress.',
+    color: '#3B82F6'
   },
   {
     value: 'trainer',
     label: 'Trainer',
-    description: 'Guide fitness sessions and review activity progress with a coaching lens.'
+    description: 'Guide fitness sessions and review activity progress with a coaching lens.',
+    color: '#8B5CF6'
   },
   {
     value: 'admin',
     label: 'Admin',
-    description: 'Backend Developer & Software Engineer workspace owner.'
+    description: 'Backend Developer & Software Engineer workspace owner.',
+    color: '#EF4444'
   }
 ];
 
@@ -25,6 +28,163 @@ export function normalizeRole(role) {
 
 export function getRoleProfile(role) {
   return roleOptions.find((option) => option.value === normalizeRole(role)) || roleOptions[0];
+}
+
+// Role-based permissions and features
+export const rolePermissions = {
+  customer: {
+    // UNIQUE: Can view only their own personal fitness data
+    canViewPersonalDashboard: true,
+    canEditPersonalProfile: true,
+    canLogActivities: true,
+    canViewPersonalReports: true,
+    canSetReminders: true,
+    canViewNutritionRecommendations: true,
+    canViewMealPlans: false,
+    canViewClientData: false,
+    canCoachClients: false,
+    canManageUsers: false,
+    canAccessSystemSettings: false,
+    canViewSystemHealth: false,
+    canAuditData: false,
+    canModifyRoles: false,
+    canDeleteActivities: true,
+    canExportData: false,
+    
+    // CUSTOMER-SPECIFIC FEATURES
+    features: {
+      personalFitnessTracking: true,
+      activityLogging: true,
+      reminders: true,
+      personalGoalTracking: true,
+      basicReporting: true,
+      nutritionGuidance: true,
+      // Customer CANNOT access:
+      clientManagement: false,
+      coachingTools: false,
+      systemAdmin: false,
+      dataAudit: false
+    },
+    
+    // Allowed pages - CUSTOMER ONLY
+    allowedPages: ['/','/', '/activity', '/reports', '/recommendations', '/alarms', '/profile'],
+    blockedPages: ['/readiness', '/clients', '/admin', '/audit']
+  },
+
+  trainer: {
+    // UNIQUE: Can view only their coaching clients' data, NOT personal
+    canViewPersonalDashboard: false,
+    canEditPersonalProfile: true,
+    canLogActivities: false,
+    canViewPersonalReports: false,
+    canSetReminders: false,
+    canViewNutritionRecommendations: false,
+    canViewMealPlans: true,
+    canViewClientData: true,
+    canCoachClients: true,
+    canManageUsers: false,
+    canAccessSystemSettings: false,
+    canViewSystemHealth: false,
+    canAuditData: false,
+    canModifyRoles: false,
+    canDeleteActivities: false,
+    canExportData: true,
+    
+    // TRAINER-SPECIFIC FEATURES
+    features: {
+      personalFitnessTracking: false,
+      activityLogging: false,
+      reminders: false,
+      personalGoalTracking: false,
+      basicReporting: false,
+      nutritionGuidance: false,
+      // Trainer CAN access:
+      clientManagement: true,
+      coachingTools: true,
+      mealPlanning: true,
+      clientReporting: true,
+      // Trainer CANNOT access:
+      systemAdmin: false,
+      dataAudit: false
+    },
+    
+    // Allowed pages - TRAINER ONLY
+    allowedPages: ['/', '/activity', '/reports', '/recommendations', '/alarms', '/profile'],
+    blockedPages: ['/readiness', '/audit', '/admin']
+  },
+
+  admin: {
+    // UNIQUE: Full system access, can view all data for system validation
+    canViewPersonalDashboard: false,
+    canEditPersonalProfile: true,
+    canLogActivities: false,
+    canViewPersonalReports: false,
+    canSetReminders: false,
+    canViewNutritionRecommendations: false,
+    canViewMealPlans: false,
+    canViewClientData: false,
+    canCoachClients: false,
+    canManageUsers: true,
+    canAccessSystemSettings: true,
+    canViewSystemHealth: true,
+    canAuditData: true,
+    canModifyRoles: true,
+    canDeleteActivities: false,
+    canExportData: true,
+    
+    // ADMIN-SPECIFIC FEATURES
+    features: {
+      personalFitnessTracking: false,
+      activityLogging: false,
+      reminders: false,
+      personalGoalTracking: false,
+      basicReporting: false,
+      nutritionGuidance: false,
+      clientManagement: false,
+      coachingTools: false,
+      mealPlanning: false,
+      clientReporting: false,
+      // Admin ONLY:
+      systemAdmin: true,
+      dataAudit: true,
+      systemHealth: true,
+      userManagement: true,
+      roleManagement: true
+    },
+    
+    // Allowed pages - ADMIN ONLY
+    allowedPages: ['/', '/activity', '/reports', '/readiness', '/profile'],
+    blockedPages: ['/alarms', '/recommendations', '/clients']
+  }
+};
+
+// Helper function to check if a role has a specific permission
+export function hasPermission(role, permission) {
+  const normalized = normalizeRole(role);
+  return rolePermissions[normalized]?.[permission] || false;
+}
+
+// Helper function to check if a role can access a page
+export function canAccessPage(role, page) {
+  const normalized = normalizeRole(role);
+  const permissions = rolePermissions[normalized];
+  if (!permissions) return false;
+  
+  // Check if page is in allowed list
+  if (!permissions.allowedPages.includes(page)) {
+    // Also check for root path alias
+    if (page !== '/' && permissions.allowedPages.includes('/')) {
+      return true;
+    }
+    return false;
+  }
+  return true;
+}
+
+// Helper function to check if a role has a specific feature
+export function hasFeature(role, featureName) {
+  const normalized = normalizeRole(role);
+  return rolePermissions[normalized]?.features?.[featureName] || false;
 }
 
 const roleInterfaces = {
@@ -84,14 +244,13 @@ const roleInterfaces = {
   },
   trainer: {
     workspaceTitle: 'Trainer Coaching Workspace',
-    topbarEyebrow: 'Trainer Portal',
-    navRoutes: ['/', '/activity', '/reports', '/recommendations', '/alarms', '/profile'],
+    topbarEyebrow: 'Trainer Portal - Client Coaching',
+    navRoutes: ['/', '/activity', '/reports', '/recommendations', '/profile'],
     navLabels: {
       '/': 'Coaching Hub',
       '/activity': 'Session Builder',
       '/reports': 'Client Analytics',
       '/recommendations': 'Meal Plans',
-      '/alarms': 'Follow-ups',
       '/profile': 'Trainer Profile'
     },
     insights: {
